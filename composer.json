@@ -1,0 +1,30 @@
+{
+    "name": "orange/ai-blog",
+    "description": "Auto blog post Generator",
+    "type": "wordpress-plugin",
+    "license": "GPLv2",
+    "autoload": {
+        "psr-4": {
+            "Orange\\AiBlog\\": "",
+            "Orange\\AiBlog\\Src\\": "src/",
+            "OpenAI\\": "api/",
+            "Orange\\AiBlog\\license\\": "license/"
+        }
+    },
+    "authors": [
+        {
+           "name": "Orangetoolz",
+           "email": "ibrahimkhalil@orangetoolz.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "guzzlehttp/guzzle": "^7.9"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+   
+}
