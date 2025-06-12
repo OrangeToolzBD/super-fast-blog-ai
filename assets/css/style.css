@@ -1079,7 +1079,7 @@ float: right;
 }
 
 .art-tabs li {
-  padding: 10px 40px;
+  padding: 10px 38px;
   margin-right: 5px;
   cursor: pointer;
   color:#757575;
@@ -1223,7 +1223,9 @@ margin: 0px;
 .accordion .arrow {
   transition: transform 0.3s ease;
 }
-
+.accordion h5{
+  font-size: 14px;
+}
 .accordion.active .arrow {
   transform: rotate(180deg);
 }

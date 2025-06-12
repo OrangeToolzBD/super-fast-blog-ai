@@ -14,7 +14,10 @@ class Class_Logschedulepost {
     public function __construct()
         {
            add_action('wp_ajax_otslf_title_log_list', [$this, 'otslf_title_log_list']);  
-           add_action('wp_ajax_otslf_delete_multiple_blog_title', [$this, 'otslf_delete_multiple_blog_title']);     
+           add_action('wp_ajax_otslf_delete_multiple_blog_title', [$this, 'otslf_delete_multiple_blog_title']);  
+           add_action('wp_ajax_nopriv_otslf_delete_multiple_blog_title', [$this,'otslf_delete_multiple_blog_title']);
+           
+           add_action('wp_ajax_otslf_delete_log_title', [$this, 'otslf_delete_log_title']);
         }    
     
         public function otslf_title_log_list(){            
@@ -146,13 +149,15 @@ class Class_Logschedulepost {
                 if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ai-seo-content-nonce' ) ) {
                     wp_send_json_error( __( 'Invalid nonce.', 'super-fast-blog-ai' ) );
                 }
+                
             
                 // Check if ID is present and valid
                 $id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
                 if ( ! $id ) {
                     wp_send_json_error( __( 'ID is missing or invalid.', 'super-fast-blog-ai' ) );
                 }
-            
+                
+
                 global $wpdb;
                 $schedule_post_table = $wpdb->prefix . 'slf_schedule_post_title_log';
                 $cache_key = 'schedule_post_title_log_' . $id;
@@ -161,7 +166,8 @@ class Class_Logschedulepost {
                 $deleted = $wpdb->query(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                     $wpdb->prepare("DELETE FROM {$schedule_post_table} WHERE id = %d",$id)
                 );
-            
+        
+
                 if ( false !== $deleted ) {
                     wp_send_json_success( __( 'Record deleted successfully.', 'super-fast-blog-ai' ) );
                 } else {
@@ -177,33 +183,38 @@ class Class_Logschedulepost {
                ==================================*/
                                 
 
-            public function otslf_delete_multiple_blog_title() {
-                check_ajax_referer('ai-seo-content-nonce', 'nonce');
-                global $wpdb;
+           public function otslf_delete_multiple_blog_title() {
+                // Nonce check
+                if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ai-seo-content-nonce' ) ) {
+                    wp_send_json_error( __( 'Invalid nonce.', 'super-fast-blog-ai' ) );
+                }
 
+                global $wpdb;
                 $table_name = $wpdb->prefix . 'slf_schedule_post_title_log';
                 $ids = isset($_POST['id']) ? array_map('intval', $_POST['id']) : [];
 
-                if (!empty($ids)) {
-                    $placeholders = implode(',', array_fill(0, count($ids), '%d'));
-                    $query = "DELETE FROM {$table_name} WHERE id IN ($placeholders)";
-
-                    foreach ($ids as $id) {
-                        $cache_key = 'schedule_post_title_log_' . $id;
-                        wp_cache_delete($cache_key, 'slf_schedule_post_title_log');
-                    }
-                    $deleted = $wpdb->query($wpdb->prepare($query, $ids));       // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                      if ($deleted) {                                           // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        foreach ($ids as $id) {
-                            wp_cache_set('schedule_post_title_log_' . $id, false, 'slf_schedule_post_title_log'); 
-                        }
-                    }
+                if ( empty( $ids ) ) {
+                    wp_send_json_error(['message' => 'No IDs provided for deletion.']);
                 }
-            
-                if ($deleted !== false) {
+
+                // Build DELETE query
+                $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+                $query = $wpdb->prepare("DELETE FROM $table_name WHERE postid IN ($placeholders)", $ids);
+                $deleted = $wpdb->query($query);        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+                // If deletion successful, clear cache
+                if ( $deleted !== false ) {
+                    foreach ( $ids as $post_id ) {
+                        wp_cache_delete( 'slf_title_log_' . $post_id, 'slf_cache_group' );
+                    }
+
                     wp_send_json_success(['message' => 'Selected titles deleted successfully.']);
                 } else {
                     wp_send_json_error(['message' => 'Failed to delete selected titles.']);
                 }
-            }     
-    }
+            } 
+
+
+
+
+        }

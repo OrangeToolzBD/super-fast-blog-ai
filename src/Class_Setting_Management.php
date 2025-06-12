@@ -23,6 +23,8 @@ class Class_Setting_Management {
         register_setting('otslf_setting_group', 'otslf_language_tone', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('otslf_setting_group', 'otslf_word_count', array('type' => 'integer', 'sanitize_callback' => 'absint')); // Ensure this is a number
         register_setting('otslf_setting_group', 'otslf_list_faq', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('otslf_setting_group', 'otslf_table_con', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('otslf_setting_group', 'otslf_poscon', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('otslf_setting_group', 'otslf_sub_heading', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('otslf_setting_group', 'otslf_htaging', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('otslf_setting_group', 'otslf_number_h', array('type' => 'integer', 'sanitize_callback' => 'absint')); // Ensure this is a number
@@ -151,7 +153,7 @@ class Class_Setting_Management {
                                         value="<?php echo esc_attr(get_option('otslf_unsplash_generate_api_key')); ?>"/>
                                     <span class="img_api_input_field"></span>
                                 </div> 
-                                <span class="img_api"><a href="https://pixabay.com/api/docs" target="_blank">Get Your API Key</a></span>     
+                                <span class="img_api"><a href="https://unsplash.com/documentation/" target="_blank">Get Your API Key</a></span>     
                            </div>
 
                         </td>
@@ -346,7 +348,6 @@ class Class_Setting_Management {
                     <div class="dropdown-container">
                       <div class="colleft"><?php esc_html_e('Heading Tag','super-fast-blog-ai'); ?></div>
                         <select id="otslf_htaging" name="otslf_htaging">
-                            <option value="h1" <?php selected('h1', get_option('otslf_htaging')); ?>>H1</option>
                             <option value="h2" <?php selected('h2', get_option('otslf_htaging')); ?>>H2</option>
                             <option value="h3" <?php selected('h3', get_option('otslf_htaging')); ?>>H3</option>
                             <option value="h4" <?php selected('h4', get_option('otslf_htaging')); ?>>H4</option>
@@ -370,7 +371,7 @@ class Class_Setting_Management {
                             <option value="10" <?php selected('10', get_option('otslf_number_h')); ?>>10</option>
                             <option value="11" <?php selected('11', get_option('otslf_number_h')); ?>>11</option>
                             <option value="12" <?php selected('12', get_option('otslf_number_h')); ?>>12</option>
-                    </select>
+                        </select>
                     </div>
                 </div>
                 </td>
@@ -382,6 +383,14 @@ class Class_Setting_Management {
                 <label for="otslf_list_faq"><?php esc_html_e('Article FAQ','super-fast-blog-ai')?></label>    
                 <input type="checkbox" id="otslf_list_faq" name="otslf_list_faq" value="1" <?php checked('1', get_option('otslf_list_faq')); ?> />
              </div>  
+             <div class="checkbox-container">
+                <label for="otslf_table_con"> <?php esc_html_e('Table of Contents','super-fast-blog-ai')?></label>    
+                <input type="checkbox" id="otslf_table_con" name="otslf_table_con" value="1" <?php checked('1', get_option('otslf_table_con')); ?> />
+             </div>
+             <div class="checkbox-container">
+                <label for="otslf_poscon"> <?php esc_html_e('Pros & Cons','super-fast-blog-ai')?></label>    
+                <input type="checkbox" id="otslf_poscon" name="otslf_poscon" value="1" <?php checked('1', get_option('otslf_poscon')); ?> />
+             </div>
              </th>  
             </tr>
           </table>

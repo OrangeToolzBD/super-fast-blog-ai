@@ -32,8 +32,13 @@ class Class_Aititlegenerate
     private $unplash;
     private $seokey;
     private $seometa;
+    private $interlink;
+    private $interlinktype;
+    private $imgaccess;
+    private $table_content;
+    private $proscons;
 
-     public function __construct() {
+    public function __construct() {
 
       add_action('wp_ajax_otslf_generate_blog_title', [$this, 'otslf_generate_blog_title']);
       add_action('wp_ajax_otslf_instant_generate_post_content', [$this, 'otslf_instant_generate_post_content']);
@@ -61,9 +66,11 @@ class Class_Aititlegenerate
       $this->number_h = get_option('otslf_number_h');
       $this->email_notification = get_option('otslf_email_notification');
       $this->schedule = get_option('otslf_schedule');
-      $this->unplash = get_option('otslf_unsplash_generate_api_key');
       $this->seokey = get_option('otslf_seokeyword');
       $this->seometa = get_option('otslf_meta_des');
+      $this->imgaccess = get_option('otslf_unsplash_generate_api_key');
+      $this->table_content = get_option('otslf_table_con');
+      $this->proscons = get_option('otslf_poscon');
 
         if($this->schedule === 'later_same_day') {
             
@@ -436,15 +443,13 @@ class Class_Aititlegenerate
                 wp_die();
             }
         
-          
-                
+                 
             /* ======================================  
                       Instant article generate  
                ====================================*/    
 
-
             public function otslf_instant_generate_post_content() {
-
+                
                 check_ajax_referer('ai-seo-content-nonce', 'nonce');
                 
                 error_log('Artcile generator');
@@ -475,74 +480,155 @@ class Class_Aititlegenerate
                     $estimated_tokens = min($estimated_tokens, $max_token_limit);
 
                     // Prepare the prompt
-                    // Prepare the improved prompt with primary and secondary keywords
-                    $prompt = [
-                        [
-                            'role' => 'system',
-                            'content' => esc_html__('You are an expert SEO assistant that generates well-structured, keyword-optimized, and SEO-friendly content. Ensure the content is engaging, informative, and easy to read.', 'super-fast-blog-ai')
-                        ],
-                        [
-                            'role' => 'user',   
-                            'content' => sprintf(     
-                                esc_html__('Generate a detailed, SEO-optimized article on "%1$s" with at least "%2$d" words. Follow these SEO guidelines:', 'super-fast-blog-ai'),
-                                esc_html($title),
-                                $user_word_count
-                            )
-                           
-                        ],
-                        [
-                            'role' => 'user',
-                                'content' => sprintf(
-                                    /* translators: %1$s, %2$s, %3$s, %4$s, %5$s: Main keyword used multiple times in different contexts,
-                                    * %6$s, %7$s, %8$s, %9$s: Secondary keywords used throughout the article */
-                                    esc_html__(
-                                        '1. Use the first generated main keyword "%1$s" within the first 100 words of the article.
-                                2. Include the first keyword "%2$s" in the <h1>, <h2>, and <h3> tags.
-                                3. Place the first keyword "%3$s" naturally and contextually in a few paragraphs.
-                                4. Use the first keyword "%4$s" 8-12 times in a 1000-word article and 10-12 times in a 1500-word article.
-                                5. Place the first keyword "%5$s" in relevant places throughout the article, including the last paragraph.
-                                6. Use the following secondary keywords naturally in the article, ensuring a density of 0.5%%–1%%:
-                                - %6$s
-                                - %7$s
-                                - %8$s
-                                - %9$s
-                                7. Use one secondary keyword every 100-150 words, ensuring the content remains natural and engaging.
-                                8. End the article with a concluding paragraph that includes the main keyword.
-                                9. Use clear and informative subheadings to improve readability and SEO.',
-                                        'super-fast-blog-ai'
-                                    ),
-                                    esc_html($keywordSeparet[0]),
-                                    esc_html($keywordSeparet[0]),
-                                    esc_html($keywordSeparet[0]),
-                                    esc_html($keywordSeparet[0]),
-                                    esc_html($keywordSeparet[0]),
-                                    esc_html($keywordSeparet[1]),
-                                    esc_html($keywordSeparet[2]),
-                                    esc_html($keywordSeparet[3]),
-                                    esc_html($keywordSeparet[4])
-                                )
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => esc_html__('Ensure the article contains no more than 10% passive sentences.', 'super-fast-blog-ai')
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => esc_html__('Ensure that no more than 25% of the sentences in the article contain more than 20 words.', 'super-fast-blog-ai')
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => esc_html__('Ensure at least 30% of the sentences in the article contain transition words to improve readability.', 'super-fast-blog-ai')
-                            ]    
-                    ];
 
-                    // Include FAQ section if requested
+                        // Initialize the prompt array
+                        $prompt = [];
+                    
+                        $prompt = [
+
+                            [
+                                'role' => 'system',
+                                'content' => esc_html__('You are an expert SEO assistant that generates well-structured, keyword-optimized, and SEO-friendly content. Ensure the content is engaging, informative, and easy to read.', 'super-fast-blog-ai')
+                            ],
+                            [
+                                'role' => 'user',   
+                                'content' => sprintf(     
+                                    esc_html__('Generate a detailed, SEO-optimized article on "%1$s" with at least "%2$d" words. Follow these SEO guidelines:', 'super-fast-blog-ai'),
+                                    esc_html($title),
+                                    $user_word_count
+                                )
+                               
+                            ],
+                            [
+                                'role' => 'user',
+                                    'content' => sprintf(
+                                        /* translators: %1$s, %2$s, %3$s, %4$s, %5$s: Main keyword used multiple times in different contexts,
+                                        * %6$s, %7$s, %8$s, %9$s: Secondary keywords used throughout the article */
+                                        esc_html__(
+                                            '1. Use the first generated main keyword "%1$s" within the first 100 words of the article.
+                                    2. Include the first keyword "%2$s" in the <h1>, <h2>, and <h3> tags.
+                                    3. Place the first keyword "%3$s" naturally and contextually in a few paragraphs.
+                                    4. Use the first keyword "%4$s" 8-12 times in a 1000-word article and 10-12 times in a 1500-word article.
+                                    5. Place the first keyword "%5$s" in relevant places throughout the article, including the last paragraph.
+                                    6. Use the following secondary keywords naturally in the article, ensuring a density of 0.5%%–1%%:
+                                    - %6$s
+                                    - %7$s
+                                    - %8$s
+                                    - %9$s
+                                    7. Use one secondary keyword every 100-150 words, ensuring the content remains natural and engaging.
+                                    8. End the article with a concluding paragraph that includes the main keyword.
+                                    9. Use clear and informative subheadings to improve readability and SEO.',
+                                            'super-fast-blog-ai'
+                                        ),
+                                        esc_html($keywordSeparet[0]),
+                                        esc_html($keywordSeparet[0]),
+                                        esc_html($keywordSeparet[0]),
+                                        esc_html($keywordSeparet[0]),
+                                        esc_html($keywordSeparet[0]),
+                                        esc_html($keywordSeparet[1]),
+                                        esc_html($keywordSeparet[2]),
+                                        esc_html($keywordSeparet[3]),
+                                        esc_html($keywordSeparet[4])
+                                    )
+                                ],
+                                [
+                                    'role' => 'user',
+                                    'content' => esc_html__('Ensure the article contains no more than 10% passive sentences.', 'super-fast-blog-ai')
+                                ],
+                                [
+                                    'role' => 'user',
+                                    'content' => esc_html__('Ensure that no more than 25% of the sentences in the article contain more than 20 words.', 'super-fast-blog-ai')
+                                ],
+                                [
+                                    'role' => 'user',
+                                    'content' => esc_html__('Ensure at least 30% of the sentences in the article contain transition words to improve readability.', 'super-fast-blog-ai')
+                                ]    
+                        ];   
+
+                    
+                     
+                  // Include FAQ section if requested
                     if ($this->faq === '1') {
                         $prompt[] = [
                             'role' => 'user',
                             'content' => esc_html__('Add a FAQ section at the end of the article to answer common questions.', 'super-fast-blog-ai')
                         ];
                     }
+
+                    // Conditionally add the table of contents section if table_content equals '1'
+                        /* if ($this->table_content === '1') {
+                          $prompt[] =  [
+                                'role'    => 'user',
+                                'content' => esc_html__(
+                                    'After writing the introduction of the article, create a "Table of Contents" section. 
+                                    Use a bulleted list (or numbered list) for the major headings of the article. 
+                                    For each item in the list, use descriptive anchor text that links to the corresponding heading in the article. 
+                                    The table of contents should appear immediately after the introduction, clearly labeled, 
+                                    and should resemble the following format:
+                            
+                                    Table of Contents
+                                    - [Heading 1]
+                                    - [Heading 2]
+                                    - [Heading 3]
+                                    - [Heading 4]
+                                
+                            
+                                    Each entry in the table of contents should match the headings used in the article and provide a brief overview 
+                                    or link to that section.',
+                                    'super-fast-blog-ai'
+                                )
+                            ];
+                        } */    
+
+                        if ( $this->table_content === '1' ) {
+                                $prompt[] = [
+                                    'role'    => 'user',
+                                    'content' => esc_html__(
+                                        'After writing the introduction, insert a **Table of Contents** wrapped in a container with a light-gray background (#d7d6d5). For example:
+
+                                <div style="background-color:#d7d6d5; padding:16px; border-radius:4px;">
+                                <strong>Table of Contents</strong>
+                                <ul>
+                                <li><a href="#heading-1">Heading 1</a></li>
+                                <li><a href="#heading-2">Heading 2</a></li>
+                                <li><a href="#heading-3">Heading 3</a></li>
+                                <li><a href="#heading-4">Heading 4</a></li>
+                                </ul>
+                                </div>
+
+                                Use inline CSS exactly as shown (`background-color:#d7d6d5; padding:16px;`) and ensure each link’s href matches the generated heading anchors.',
+                                            'super-fast-blog-ai'
+                                        ),
+                                    ];
+                        }
+
+
+                        // Pros & Cons as styled HTML table
+                        if ( $this->proscons === '1' ) {
+                                $prompt[] = [
+                                    'role'    => 'user',
+                                    'content' => esc_html__(
+                                        'Include a **Pros and Cons** section formatted as an HTML table with inline CSS styling. The table should look like this:
+
+                            <table>
+                            <tr>
+                                <th style="background-color:red;color:white;">Pros</th>
+                                <th style="background-color:green;color:white;">Cons</th>
+                            </tr>
+                            <tr>
+                                <td>First pro point</td>
+                                <td>First con point</td>
+                            </tr>
+                            <!-- …more rows as needed… -->
+                            </table>
+
+                            Use only the `<table>`, `<tr>`, `<th>`, and `<td>` tags for this section, and apply the inline styles exactly as shown:  
+                            – Pros cells: `background-color:red; color:white;`  
+                            – Cons cells: `background-color:green; color:white;`',
+                                        'super-fast-blog-ai'
+                                    ),
+                            ];
+                        }
 
                     // Include subheadings with specified heading tags and count if requested
                     if ($this->subheading === '1') {
@@ -594,12 +680,12 @@ class Class_Aititlegenerate
                             if ($this->seokey == 1 || $this->seometa == 1){
                                 $this->otslf_update_seo_meta_generate($post_id, $seokeyword, $metadescrip);
                             }
-
-                            wp_set_post_terms($post_id, $ot_taxonomy, 'category');
-                            $this->otslf_set_featured_image($post_id, $title);
+                                
                             
-                            error_log('Article-2', '222');
-
+                                
+                            wp_set_post_terms($post_id, $ot_taxonomy, 'category');
+                            $this->otslf_set_featured_image($post_id, $seokeyword, $title);
+                            
                             // Insert log entry
                             $schedule_post = $wpdb->prefix . 'slf_schedule_post_title_log';
                             $data = [
@@ -644,10 +730,11 @@ class Class_Aititlegenerate
                 }
             }
             
+          
 
-        
-             
-                
+                                                        
+
+                    
                  /*===========================================================
                     Keyword & meta description define in Yoast or Rank Math
                 ============================================================= */
@@ -674,9 +761,7 @@ class Class_Aititlegenerate
                     update_post_meta( $post_id, 'rank_math_description', $metadescrip );
                     }
 
-                } else {
-
-                }
+                } 
             }    
 
 
@@ -835,7 +920,95 @@ class Class_Aititlegenerate
                    wp_mail($admin_email, $subject, $message);
             }
 
+            /* ===== schedule keyword generat ===== */
             
+            public function otslf_schedule_generate_seo_keywords( $title ) {
+                // Prepare the prompt for keyword generation
+                $prompt = 'Provide only a list of five SEO keywords based on the following input: ' . $title;
+                
+                // Call the OpenAI API
+                $response = wp_remote_post('https://api.openai.com/v1/chat/completions', array(
+                    'body'    => wp_json_encode(array(
+                        'model'    => $this->aimodel,
+                        'messages' => array(
+                            array('role' => 'system', 'content' => 'You are a helpful assistant.'),
+                            array('role' => 'user', 'content' => $prompt)
+                        ),
+                        'max_tokens' => 1000
+                    )),
+                    'headers' => array(
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => 'Bearer ' . $this->apikey
+                    ),
+                    'timeout' => 20,
+                ));
+                
+                if (is_wp_error($response)) {
+                    return new WP_Error('openai_error', 'Error connecting to OpenAI API.');
+                }
+                
+                $body = wp_remote_retrieve_body($response);
+                $data = json_decode($body, true);
+                
+                if (isset($data['choices'][0]['message']['content'])) {
+                    $titles = explode("\n", $data['choices'][0]['message']['content']);
+                    $titles = array_map('trim', $titles);
+                    
+                    // Filter out any unwanted phrases and empty lines
+                    $clean_titles = array_filter($titles, function($title) {
+                        return !empty($title) && !preg_match('/^Here are|^Certainly|^Sure|^given topic/', $title);
+                    });
+                    
+                    // Remove numbering and extra quotes
+                    $clean_titles = array_map(function($title) {
+                        $title = preg_replace('/^\d+\.\s*/', '', $title);
+                        return trim($title, '"');
+                    }, $clean_titles);
+                    
+                    return array_values($clean_titles);
+                } else {
+                    return new WP_Error('openai_response_error', 'Keyword generation failed.');
+                }
+            }
+
+
+            /* ========= Schedule Meta Description generat ======== */
+            
+            public function otslf_schedule_generate_meta_description( $title ) {
+                $prompt = 'Write a SEO-friendly 160-character meta description based on the following input: ' . $title;
+            
+                $response = wp_remote_post('https://api.openai.com/v1/chat/completions', array(
+                    'body'    => wp_json_encode(array(
+                        'model'      => $this->aimodel,
+                        'messages'   => array(
+                            array('role' => 'system', 'content' => 'You are a helpful assistant.'),
+                            array('role' => 'user', 'content' => $prompt)
+                        ),
+                        'max_tokens' => 50,
+                    )),
+                    'headers' => array(
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => 'Bearer ' . $this->apikey
+                    ),
+                    'timeout' => 30,
+                ));
+            
+                if ( is_wp_error( $response ) ) {
+                    return new WP_Error('openai_error', 'Error connecting to OpenAI API.');
+                }
+            
+                $body = wp_remote_retrieve_body( $response );
+                $data = json_decode( $body, true );
+            
+                if ( isset( $data['choices'][0]['message']['content'] ) ) {
+                    return trim( $data['choices'][0]['message']['content'] );
+                } else {
+                    return new WP_Error('openai_response_error', 'Meta description generation failed.');
+                }
+            }
+            
+
+
             public function otslf_schedule_article_publish($title) {
 
 				global $wpdb;
@@ -937,8 +1110,35 @@ class Class_Aititlegenerate
 							$cache_key = 'generated_title_' . $title;
 							$wpdb->delete($table, ['generate_title' => $title]); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 							wp_cache_delete($cache_key);
+
+
+                            $seokeyword = $this->otslf_schedule_generate_seo_keywords( $title );
+                            $metadescrip = $this->otslf_schedule_generate_meta_description( $title );
+
+                            $yoast_seo = 'wordpress-seo/wp-seo.php';
+                            $rank_math_seo = 'seo-by-rank-math/rank-math.php';
+                            
+                      
+                            if ( is_plugin_active( $yoast_seo ) ) {
+                                if(get_option('otslf_seokeyword') ==='1') {
+                                update_post_meta( $post_id, '_yoast_wpseo_focuskw', $seokeyword );
             
-                            // Send success response
+                                }if(get_option('otslf_meta_des') ==='1') {
+                                update_post_meta( $post_id, '_yoast_wpseo_metadesc', $metadescrip );
+                                }        
+            
+                            } elseif ( is_plugin_active( $rank_math_seo ) ) {
+            
+                                if(get_option('otslf_seokeyword') ==='1') {
+                                update_post_meta( $post_id, 'rank_math_focus_keyword', $seokeyword );
+            
+                                }if(get_option('otslf_meta_des') ==='1') {
+                                update_post_meta( $post_id, 'rank_math_description', $metadescrip );
+                                }
+                            } 
+
+
+                           // Send success response
                             wp_send_json_success([
                                 'message' => esc_html_e('Post published successfully.', 'super-fast-blog-ai'),
                                 'title' => $title
@@ -960,25 +1160,28 @@ class Class_Aititlegenerate
                     return;
                 }
             }
+
+
+
+            
               
-        
-                /*================================
+              /*================================
                         Featured image
                 ================================ */  
 
-            public function otslf_set_featured_image($post_id, $title) { 
+            public function otslf_set_featured_image($post_id, $seokeyword, $title) { 
                             
                 if ($this->featuredimage == 'pixabay') {
-                    $image_url = $this->otslf_get_pixabay_image($title);
+                    $image_url = $this->otslf_get_pixabay_image($post_id, $seokeyword, $title);
                     $is_temp_file = false;
 
                 } elseif ($this->featuredimage == 'dalle3') {
-                    $image_url = $this->otslf_generate_dalle_image_for_post($title);
+                    $image_url = $this->otslf_generate_dalle_image_for_post($post_id, $seokeyword, $title);
                     $is_temp_file = true;
                     
                 } elseif ($this->featuredimage == 'unsplash') {
-                    $image_url = $this->otslf_set_featured_image_from_unsplash($post_id, $title);
-                    $is_temp_file = true; 
+                    $image_url = $this->otslf_set_featured_image_from_unsplash($post_id, $seokeyword, $title);
+                    $is_temp_file = false; 
                 }
             
                 if ($image_url) {
@@ -1021,7 +1224,7 @@ class Class_Aititlegenerate
             
             /* Try to findout good image using more keyword */
 
-            public function otslf_get_pixabay_image($seokeyword) {
+            public function otslf_get_pixabay_image($post_id, $seokeyword, $title) {
     
                 if ($this->featuredimage !== 'pixabay') {
                     return false;
@@ -1029,44 +1232,57 @@ class Class_Aititlegenerate
                 
                 $api_key = $this->pixabyapikey;
             
-                // Split keywords and handle empty results
-                $keyword_separate = array_filter(explode(",", $seokeyword));
-                if (empty($keyword_separate)) {
-                    return false;
+                // Process SEO keyword
+                $keyword_separate = array_filter(array_map('trim', explode(",", $seokeyword)));
+            
+                // If no valid keywords, fallback to title
+                if (empty($keyword_separate) && !empty($title)) {
+                    $keyword_separate = [trim($title)];
                 }
             
-                // Try each keyword until we find an image
+                error_log('Searching Image for Keyword(s): ' . implode(", ", $keyword_separate));
+            
                 foreach ($keyword_separate as $term) {
-                    $term = trim($term); // Remove extra spaces
                     if (empty($term)) continue;
             
+                    // Construct API URL
                     $url = add_query_arg([
-                        'key' => $api_key,
-                        'q' => urlencode($term),
+                        'key'        => $api_key,
+                        'q'          => urlencode($term),
                         'image_type' => 'photo',
-                        'safesearch' => 'true'
+                        'safesearch' => 'true',
+                        'order'      => 'popular', // Sort by popularity
+                        'per_page'   => 5 // Fetch multiple images for better selection
                     ], 'https://pixabay.com/api/');
             
+                    // Fetch data from Pixabay
                     $response = wp_remote_get($url, [
-                        'timeout' => 15,
+                        'timeout'   => 15,
                         'sslverify' => true
                     ]);
             
                     if (is_wp_error($response)) {
+                        error_log('Pixabay API Error: ' . $response->get_error_message());
                         continue;
                     }
             
                     $body = wp_remote_retrieve_body($response);
                     $data = json_decode($body, true);
             
-                    if (!empty($data['hits']) && isset($data['hits'][0]['largeImageURL'])) {
+                    if (!empty($data['hits'])) {
+                        // Sort images by relevance (if needed)
+                        usort($data['hits'], function ($a, $b) {
+                            return $b['views'] - $a['views']; // Most viewed image first
+                        });
+            
+                        // Return the best-matching image URL
                         return $data['hits'][0]['largeImageURL'];
                     }
                 }
             
                 return false;
             }
-
+                
 
 
             /*================================
@@ -1127,18 +1343,15 @@ class Class_Aititlegenerate
                         Unsplash image API
                 ================================ */   
 
-            public function otslf_set_featured_image_from_unsplash($post_id, $title) {
-                // Ensure it's a post and that it doesn't already have a featured image.
-                /* if (get_post_type($post_id) !== 'post' || has_post_thumbnail($post_id)) {
-                    return false;
-                } */
-                                
- 
-                //$post_title = get_the_title($post_id);
-            
-                //$api_key = $this->unplash;
-                $api_key = 'LzDg6ioEgqJ4k5fi1-QQfuc9bJGOq2PnzJPtWN1XcqI';
-                $api_url = "https://api.unsplash.com/photos/random?query=" . urlencode($title) . "&client_id=" . $api_key;
+            public function otslf_set_featured_image_from_unsplash_sss($post_id, $seokeyword, $title) {
+                // Set up the Unsplash API key and search URL.
+                $api_key = $this->$imgaccess;
+                
+                error_log('Title :' . $title);
+
+                $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($title) . "&client_id=" . $api_key;
+                
+                error_log('Fetching image from Unsplash');
                 
                 // Fetch image data from Unsplash.
                 $response = wp_remote_get($api_url);
@@ -1146,6 +1359,8 @@ class Class_Aititlegenerate
                     error_log('Unsplash API request failed: ' . $response->get_error_message());
                     return false;
                 }
+                
+                error_log('Unsplash image fetched');
                 
                 // Check the HTTP response code.
                 $response_code = wp_remote_retrieve_response_code($response);
@@ -1156,35 +1371,298 @@ class Class_Aititlegenerate
                 
                 $body = wp_remote_retrieve_body($response);
                 $data = json_decode($body, true);
-                if (!is_array($data) || empty($data['urls']['regular'])) {
+                
+                error_log('Processing Unsplash API response');
+                
+                // Check if the results array exists and contains a valid image URL.
+                if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
                     error_log("Unsplash API response is missing a valid image URL.");
                     return false;
                 }
                 
-                $image_url = $data['urls']['regular'];
-                
-                // Download and set the image as the featured image.
-                $image_id = media_sideload_image($image_url, $post_id, $search_query, 'id');
-                if (is_wp_error($image_id)) {
-                    error_log('Image sideload failed: ' . $image_id->get_error_message());
-                    return false;
-                }
-                
-                // Set the image as the featured image.
-                if (!set_post_thumbnail($post_id, $image_id)) {
-                    error_log('Failed to set the post thumbnail.');
-                    return false;
-                }
-                
-                return true;
+                // Get the regular-sized image URL from the first result.
+                $image_url = $data['results'][0]['urls']['regular'];
+                error_log('Unsplash Image url: ' . $image_url);
+                return $image_url;
             }
 
-            
+            public function otslf_set_featured_image_from_unsplash_zzz($post_id, $seokeyword, $title) {
+                // Separate the keywords and remove empty values.
+                $keywords = array_filter(array_map('trim', explode(",", $seokeyword)));
                 
-              
+                $api_key = $this->$imgaccess;
+                
+                // Normalize title words for comparison.
+                $title_words = array_map('strtolower', explode(" ", $title));
+                
+                // Loop through each keyword to find a valid image.
+                foreach ($keywords as $term) {
+                    // Normalize the keyword words.
+                    $term_words = array_map('strtolower', explode(" ", $term));
+                    // Find common words between the title and the keyword.
+                    $common_words = array_intersect($title_words, $term_words);
+                    
+                    error_log('common words' . $common_words);
+                    
+                    // If common words exist, use them; otherwise, use the original keyword.
+                    $search_query = !empty($common_words) ? implode(" ", $common_words) : $term;
+                    
+                    // Build the API URL using the refined query.
+                    $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($search_query) . "&client_id=" . $api_key;
+                    error_log('Fetching image from Unsplash for term: ' . $term . ' with query: ' . $search_query);
+
+                    error_log('URL' . $api_url);
+
+                    // Fetch image data from Unsplash.
+                    $response = wp_remote_get($api_url);
+                    if (is_wp_error($response)) {
+                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message());
+                        continue; // Try next keyword.
+                    }
+                    
+                    // Check HTTP response code.
+                    $response_code = wp_remote_retrieve_response_code($response);
+                    if ($response_code !== 200) {
+                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term);
+                        continue; // Try next keyword.
+                    }
+                    
+                    $body = wp_remote_retrieve_body($response);
+                    $data = json_decode($body, true);
+                    error_log('Processing Unsplash API response for term: ' . $term);
+                    
+                    // Check if the results array exists and contains a valid image URL.
+                    if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
+                        error_log("Unsplash API response for term '$term' is missing a valid image URL.");
+                        continue; // Try next keyword.
+                    }
+                    
+                    // Valid image found – log and return it.
+                    $image_url = $data['results'][0]['urls']['regular'];
+                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url);
+                    return $image_url;
+                }
+                
+                // If no valid image is found after checking all keywords.
+                error_log('No valid Unsplash image found for any keyword.');
+                return false;
+            }
+                                      
+            public function otslf_set_featured_image_from_unsplash($post_id, $seokeyword, $title) {    //keyword separate
+                // Separate the keywords and remove empty values.
+                $keyword_separate = array_filter(array_map('trim', explode(",", $seokeyword)));
             
-         
-            /* ================================ 
+                $api_key = $this->imgaccess;
+                
+                $common_words_string = implode(', ', $keyword_separate);
+
+                error_log('Common Words' . $common_words_string);
+
+                // Loop through each keyword to find a valid image.
+                foreach ($keyword_separate as $term) {
+
+                    error_log('Common Terms' . $term);
+
+                    $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($term) . "&client_id=" . $api_key;
+                    
+                    error_log('Fetching image from Unsplash for term: ' . $term);
+                    
+                    // Fetch image data from Unsplash.
+                    $response = wp_remote_get($api_url);
+                    if (is_wp_error($response)) {
+                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message());
+                        continue; // Try next keyword instead of returning false immediately.
+                    }
+                    
+                    // Check the HTTP response code.
+                    $response_code = wp_remote_retrieve_response_code($response);
+                    if ($response_code !== 200) {
+                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term);
+                        continue; // Try next keyword.
+                    }
+                    
+                    $body = wp_remote_retrieve_body($response);
+                    $data = json_decode($body, true);
+                    
+                    error_log('Processing Unsplash API response for term: ' . $term);
+                    
+                    // Check if the results array exists and contains a valid image URL.
+                    if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
+                        error_log("Unsplash API response for term $term is missing a valid image URL.");
+                        continue; // Try next keyword.
+                    }
+                    // If a valid image is found, log it and return.
+                    $image_url = $data['results'][0]['urls']['regular'];
+                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url);
+                    return $image_url;
+                }
+                
+                // If no keyword produced a valid image URL, log and return false.
+                error_log('No valid Unsplash image found for any keyword.');
+                return false;
+            }
+            
+            
+            
+              /*=======================================
+                    Latter day publish scheudle post 
+                ========================================*/
+
+                public function otslf_publish_scheduled_posts() {
+                    global $wpdb;
+                    
+                    $args = array(
+                        'post_type'   => 'post',
+                        'post_status' => 'draft',
+                        'numberposts' => 1,
+                        'orderby'     => 'date',
+                        'order'       => 'ASC',
+                    );
+                
+                    $scheduled_posts = get_posts($args);
+    
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'slf_generated_title';
+                    $cache_key = 'latest_generated_title';
+                    $results = wp_cache_get($cache_key);
+                    if (false === $results) {
+                       $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
+                       $results = $wpdb->get_results($query, OBJECT);            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                       wp_cache_set($cache_key, $results, '', 3600);
+                    } 	 
+                    
+                    $title = $results->generate_title;
+                
+                    if (empty($scheduled_posts) && !empty($titles)) {
+                        $title = array_shift($titles); // Get the first title
+                
+                        // Generate content using the title
+                        $allowed_html_content_post = wp_kses_allowed_html('post');
+                        $content = $this->otslf_schedule_article_publish($title);
+                        
+                        // Get the user's timezone
+                        $user_timezone = get_user_meta(get_current_user_id(), 'timezone_string', true);
+                        if (empty($user_timezone)) {
+                            $user_timezone = 'UTC';
+                        }
+                
+                        // Convert the current time to UTC and add 6 hours
+                        $current_time = new DateTime('now', new DateTimeZone($user_timezone));
+                        $scheduled_time = $current_time->setTimezone(new DateTimeZone('UTC'))->modify('+6 hours');
+                        $formatted_time = $scheduled_time->format('Y-m-d H:i:s');
+    
+                        // Prepare post data
+                        $post_data = array(
+                            'post_title'   => $title,
+                            'post_content' => wp_kses($content, $allowed_html_content_post),
+                            'post_status'  => 'draft', // Set post status to 'future' to schedule the post
+                            'post_author'  => get_current_user_id(),
+                            'post_date'    => $formatted_time, // Schedule for 6 hours later in UTC
+                        );
+                
+                        // Insert the post into the database
+                        $post_id = wp_insert_post($post_data);
+                
+                        if ($post_id) {
+                            // Set featured image
+                            $this->otslf_set_featured_image($post_id, $seokeyword, $title);
+                
+                            // Insert log entry
+                            $table_name = $wpdb->prefix . 'slf_schedule_post_title_log'; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                            $data = array(
+                                'title'    => $title,
+                                'status'   => 'Publish',
+                                'log_time' => current_time('mysql'),
+                            );
+                            $format = array('%s', '%s', '%s');
+                            $result = $wpdb->insert($table_name, $data, $format);  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                            if (false === $result) {
+                                //error_log('Error inserting log data for title: ' . $title);
+                            }
+                        } else {
+                               //error_log('Failed to insert post for title: ' . $title);
+                        }
+                
+                        // Send email notification if enabled
+                        if ($this->email_notification === '1') { 
+                            $this->otslf_post_email_notification();
+                        }
+                    }
+                }
+    
+                        
+                        /*===============================  
+                            Daily Publish scheudle post 
+                        =================================*/
+    
+    
+                public function otslf_publish_daily_scheduled_posts() {
+                
+                    $args = array(
+                        'post_type' => 'post',
+                        'post_status' => 'draft',
+                        'numberposts' => 1,
+                        'orderby' => 'date',
+                        'order' => 'ASC',
+                    );
+                
+                    $scheduled_posts = get_posts($args);
+                    
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'slf_generated_title';
+                    $cache_key = 'latest_generated_title';
+                    $results = wp_cache_get($cache_key);
+    
+                    if (false === $results) {                                     
+                        $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
+                        $results = $wpdb->get_results($query, OBJECT);     // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                        wp_cache_set($cache_key, $results, '', 3600);
+                    } 	
+                    
+                    $title = $results->generate_title;
+                
+    
+                    if (empty($scheduled_posts) && !empty($titles)) {
+                        $title = array_shift($titles); 
+                        
+                        $allowed_html_content_post = wp_kses_allowed_html('post');
+                        $content =  $this->otslf_schedule_article_publish($title);
+                        $post_data = array(
+                            'post_title'   => $title,
+                            'post_content' => wp_kses($content, $allowed_html_content_post),
+                            'post_status'  => 'draft',
+                            'post_author'  => get_current_user_id(),    //Change to your author ID
+                            'post_date'    => gmdate('Y-m-d g:i a', strtotime('+1 day')),
+                        );
+                        $post_id = wp_insert_post($post_data);
+    
+                        if ($post_id) {
+                            // Set featured image
+                            $this->otslf_set_featured_image($post_id, $seokeyword, $title);
+            
+                            // Insert log entry
+                            $table_name = $wpdb->prefix . 'slf_schedule_post_title_log';    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                            $data = array(
+                                'title' => $title,
+                                'status' => 'Publish',
+                                'log_time' => current_time('mysql'),
+                            );                                              
+                            $format = array('%s', '%s', '%s');
+                            $result = $wpdb->insert($table_name, $data, $format); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                            if (false === $result) {
+                                //error_log('Error inserting log data for title: ' . $title);
+                            }
+                        } else {
+                            ///error_log('Failed to insert post for title: ' . $title);
+                        }
+                        if ($this->email_notification === '1') { 
+                            $this->otslf_post_email_notification();
+                        }
+                    }
+                }     
+
+            
+              /* ================================ 
                        Delete the title 
                ============================== */         
         
@@ -1248,160 +1726,5 @@ class Class_Aititlegenerate
             }
         
 
-            /*=======================================
-                Latter day publish scheudle post 
-            ========================================*/
-
-            public function otslf_publish_scheduled_posts() {
-                global $wpdb;
-                
-                $args = array(
-                    'post_type'   => 'post',
-                    'post_status' => 'draft',
-                    'numberposts' => 1,
-                    'orderby'     => 'date',
-                    'order'       => 'ASC',
-                );
-            
-                $scheduled_posts = get_posts($args);
-
-				global $wpdb;
-				$table_name = $wpdb->prefix . 'slf_generated_title';
-				$cache_key = 'latest_generated_title';
-				$results = wp_cache_get($cache_key);
-				if (false === $results) {
-				   $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
-				   $results = $wpdb->get_results($query, OBJECT);            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				   wp_cache_set($cache_key, $results, '', 3600);
-				} 	 
-				
-                $title = $results->generate_title;
-            
-                if (empty($scheduled_posts) && !empty($titles)) {
-                    $title = array_shift($titles); // Get the first title
-            
-                    // Generate content using the title
-                    $allowed_html_content_post = wp_kses_allowed_html('post');
-                    $content = $this->otslf_schedule_article_publish($title);
-                    
-                    // Get the user's timezone
-                    $user_timezone = get_user_meta(get_current_user_id(), 'timezone_string', true);
-                    if (empty($user_timezone)) {
-                        $user_timezone = 'UTC';
-                    }
-            
-                    // Convert the current time to UTC and add 6 hours
-                    $current_time = new DateTime('now', new DateTimeZone($user_timezone));
-                    $scheduled_time = $current_time->setTimezone(new DateTimeZone('UTC'))->modify('+6 hours');
-                    $formatted_time = $scheduled_time->format('Y-m-d H:i:s');
-
-                    // Prepare post data
-                    $post_data = array(
-                        'post_title'   => $title,
-                        'post_content' => wp_kses($content, $allowed_html_content_post),
-                        'post_status'  => 'draft', // Set post status to 'future' to schedule the post
-                        'post_author'  => get_current_user_id(),
-                        'post_date'    => $formatted_time, // Schedule for 6 hours later in UTC
-                    );
-            
-                    // Insert the post into the database
-                    $post_id = wp_insert_post($post_data);
-            
-                    if ($post_id) {
-                        // Set featured image
-                        $this->otslf_set_featured_image($post_id, $title);
-            
-                        // Insert log entry
-                        $table_name = $wpdb->prefix . 'slf_schedule_post_title_log'; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        $data = array(
-                            'title'    => $title,
-                            'status'   => 'Publish',
-                            'log_time' => current_time('mysql'),
-                        );
-                        $format = array('%s', '%s', '%s');
-                        $result = $wpdb->insert($table_name, $data, $format);  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        if (false === $result) {
-                            //error_log('Error inserting log data for title: ' . $title);
-                        }
-                    } else {
-                           //error_log('Failed to insert post for title: ' . $title);
-                    }
-            
-                    // Send email notification if enabled
-                    if ($this->email_notification === '1') { 
-                        $this->otslf_post_email_notification();
-                    }
-                }
-            }
-
-            
-            /*===============================  
-                Daily Publish scheudle post 
-            =================================*/
-
-
-            public function otslf_publish_daily_scheduled_posts() {
-            
-                $args = array(
-                    'post_type' => 'post',
-                    'post_status' => 'draft',
-                    'numberposts' => 1,
-                    'orderby' => 'date',
-                    'order' => 'ASC',
-                );
-            
-                $scheduled_posts = get_posts($args);
-                
-				global $wpdb;
-				$table_name = $wpdb->prefix . 'slf_generated_title';
-				$cache_key = 'latest_generated_title';
-				$results = wp_cache_get($cache_key);
-
-				if (false === $results) {                                     
-					$query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
-					$results = $wpdb->get_results($query, OBJECT);     // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-					wp_cache_set($cache_key, $results, '', 3600);
-				} 	
-				
-                $title = $results->generate_title;
-            
-
-                if (empty($scheduled_posts) && !empty($titles)) {
-                    $title = array_shift($titles); 
-                    
-                    $allowed_html_content_post = wp_kses_allowed_html('post');
-                    $content =  $this->otslf_schedule_article_publish($title);
-                    $post_data = array(
-                        'post_title'   => $title,
-                        'post_content' => wp_kses($content, $allowed_html_content_post),
-                        'post_status'  => 'draft',
-                        'post_author'  => get_current_user_id(),    //Change to your author ID
-                        'post_date'    => gmdate('Y-m-d g:i a', strtotime('+1 day')),
-                    );
-                    $post_id = wp_insert_post($post_data);
-
-                    if ($post_id) {
-                        // Set featured image
-                        $this->otslf_set_featured_image($post_id, $title);
-        
-                        // Insert log entry
-                        $table_name = $wpdb->prefix . 'slf_schedule_post_title_log';    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        $data = array(
-                            'title' => $title,
-                            'status' => 'Publish',
-                            'log_time' => current_time('mysql'),
-                        );                                              
-                        $format = array('%s', '%s', '%s');
-                        $result = $wpdb->insert($table_name, $data, $format); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        if (false === $result) {
-                            //error_log('Error inserting log data for title: ' . $title);
-                        }
-                    } else {
-                        ///error_log('Failed to insert post for title: ' . $title);
-                    }
-                    if ($this->email_notification === '1') { 
-                        $this->otslf_post_email_notification();
-                    }
-                }
-            } 
+              
 }     

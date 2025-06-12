@@ -1,15 +1,15 @@
-=== Super Fast Blog Ai - SEO optimize Ai content generator  ===  
+=== Super Fast Blog AI – SEO-Optimized AI Content Generator & Writer for WordPress (20x Faster)  ===  
 Contributors: waatechdigital, khan9, ikefti  
-Tags: blog, OpenAI, AI content, blog post, ChatGPT, Ai writer, content generator 
+Tags: chatgpt, ai writer, content generate, seo friendly content 
 Requires at least: 5.2  
-Tested up to: 6.7  
-Stable tag: 1.0.0  
+Tested up to: 6.8.1  
+Stable tag: 1.0.1  
 Requires PHP: 8.0
 License: GPL2 or later  
 
 **Super Fast Blog AI** is a powerful WordPress plugin that automates content creation with advanced AI technology. By harnessing the capabilities of OpenAI’s GPT-4o, this innovative tool generates high-quality, SEO-friendly blog posts and articles, streamlining your content strategy and boosting your website’s performance.
 
-== Why use **Super Fast Blog AI** ? ==
+== Why use Super Fast Blog AI ? ==
 
 Super Fast Blog AI is the ultimate WordPress content creation partner that revolutionizes how you generate content. In today’s fast-paced digital world, producing fresh, high-quality content is essential for boosting your website's SEO and engaging your audience. This advanced plugin is designed to save you valuable time and effort by effortlessly crafting blogs, social media posts, FAQs, and even ad copy with just a few clicks.
 
@@ -44,6 +44,8 @@ The plugin interacts with the following APIs:
 * Instant article generation.  
 * Update or delete generated titles.  
 * Choose language, writing style, and tone for titles and articles.  
+* table of content is include 
+* pros and cons features add. 
 
 == PRO Features ==  
 * Generate SEO meta keywords and descriptions from titles.  
@@ -67,14 +69,17 @@ Yes, the generated articles are SEO-friendly and human-readable.
 Yes, this feature is available in the Pro version. It supports both Yoast SEO and Rank Math plugins.  
 
 == Screenshots ==  
-1. Articlegenerate
-2. Logschedule
-3. Titlegenerate
-4. Setting
+1. Setting 
+2. Ai Title generate
+3. Log schedule
+4. Article generate
 
 == Changelog ==  
-= 1.0.0 (October 6, 2024) =  
+= 1.0.0 (Mar 6, 2025) =  
 * Initial launch.  
+
+= 1.0.1 (June 12, 2025) =  
+* some technical issue fix.  
 
 == Upgrade Notice ==  
 This is the initial release, thoroughly tested for stability. No known issues—ready for use.  

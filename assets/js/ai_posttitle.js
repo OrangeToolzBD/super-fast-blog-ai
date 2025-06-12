@@ -1,117 +1,188 @@
           /* ===== Ai Title Generate ===== */
 
-            jQuery(document).ready(function($) {
-                jQuery('#generate_button').on('click', function() {
-                    var button = jQuery(this);
-            
-                    var title = jQuery('#blog_title').val();
-                    var tlanguage = jQuery('#tlanguage').val();
-                    var twstyle = jQuery('#twstyle').val();
-                    var writone = jQuery('#writone').val();
-                    var wvariation = jQuery('#wvariation').val();
-                    
-                    console.log(tlanguage);
-                    console.log(twstyle);
-                    console.log(writone);
-                    console.log(wvariation);
+                async function isMeaningfulText(text) {
+                    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Bearer " + ajax_ob.apikey,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            //model: "gpt-4o",
+                            model: ajax_ob.aimodel,
+                            messages: [
+                                {
+                                    role: "system",
+                                    content: "You are a multilingual language and meaning detector. Reply ONLY with 'yes' or 'no'. If the text is coherent and meaningful in any language, reply 'yes'. If it looks like gibberish, random characters, or has no clear meaning in any known language, reply 'no'. Do not explain anything."
+                                },
+                                {
+                                    role: "user",
+                                    content: `Is this sentence meaningful in any language? "${text}"`
+                                }
+                            ],
+                            temperature: 0
+                        })
+                    });
 
-                    jQuery('#blog_title').change('input', function() {
-                        jQuery('#prompterror').fadeOut();                                  
-                    });        
+                    const data = await response.json();
+                    const answer = data.choices[0].message.content.trim().toLowerCase();
+                    return answer === "yes";
+                }                
         
-                    if (title === '') { 
-                      jQuery('#prompterror').text('Please enter the blog title');
-                      return;
+            jQuery(document).ready(function($) {
+                var $titleField = $('#blog_title');
+                var $generateBtn = $('#generate_button');
+                var $promptError = $('#prompterror');
+                var MIN_LENGTH = 1; // minimum characters (non-numeric/non-special) to enable button
+
+                // Disable the Generate button on load
+                $generateBtn.prop('disabled', true);
+
+                // Helper: check if a string consists ONLY of digits, whitespace, or special characters
+
+               /*  function isOnlyNumericOrSpecial(text) {
+                    return /^\s*[\d\W]+\s*$/.test(text);
+                } */
+
+                // On every keystroke/input in the title field, toggle the button state
+
+             /* $titleField.on('input', function() {
+                    var currentText = $titleField.val();
+                    if (currentText.length < MIN_LENGTH || isOnlyNumericOrSpecial(currentText)) {
+                        // If it's empty, too short, or only numbers/special chars → disable
+                        $generateBtn.prop('disabled', true);
+                    } else {
+                        // Contains at least one alphabetical character → enable
+                        $generateBtn.prop('disabled', false);
+                        $promptError.fadeOut();
+                    }
+                }); */
+
+                // When Generate button is clicked
+                $generateBtn.on('click', async function(e) {
+                    e.preventDefault(); // prevent default form submission, if any
+
+                    var button = $(this);
+                    var title = $titleField.val().trim();
+                    var tlanguage = $('#tlanguage').val();
+                    var twstyle   = $('#twstyle').val();
+                    var writone   = $('#writone').val();
+                    var wvariation= $('#wvariation').val();
+
+                    // Final check: if title is empty or only numeric/special → show error and stop
+                    if (title === '') {
+                        $promptError.text('Please enter a blog title').fadeIn();
+                        return;
                     }
 
-                    if (title) {
-                        jQuery.ajax({
-                            url: ajax_ob.ajax_url,
-                            method: 'POST',
-                            dataType: 'JSON',
-                            data: {
-                                action: 'otslf_generate_blog_title',
-                                blog_title: title,
-                                tlanguage: tlanguage,
-                                twstyle: twstyle,
-                                writone: writone,
-                                wvariation: wvariation,
-                                nonce: ajax_ob.nonce
-                            },
-                            beforeSend: function(xhr) {
-                                console.log('button', button);
-                                button.append('<span class="loading-spinner"></span>');
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    jQuery('#generated-titles').html(
-                                        response.data.map(item => `<li>${item}</li>`).join('')
-                                    );
-                                    jQuery.toast({
-                                        text: "Congratulations! Your blog title successfully generated.",
-                                        heading: 'success', 
-                                        icon: 'success', 
-                                        showHideTransition: 'fade', 
-                                        allowToastClose: true, 
-                                        hideAfter: 300000, 
-                                        stack: 15, 
-                                        position: { left : 'auto', right : 100, top : 153, bottom : 'auto' },
-                                        textAlign: 'left',
-                                        loader: true, 
-                                        loaderBg: '#9EC600',
-                                        class: 'aitite-toast', 
-                                    });    
-
-                                    setTimeout(function() {
-                                        window.location.reload();
-                                    }, 300);
-            
-                                } else {
-                                    jQuery.toast({ text: 'An error: ' + response.data, 
-                                        heading: 'Failed', 
-                                        icon: 'error',
-                                        showHideTransition: 'fade',
-                                        allowToastClose: true, 
-                                        hideAfter: 300000, 
-                                        stack: 5, 
-                                        position: 'top-right', 
-                                        class: 'aitite-toast', 
-                                       });
-                                }
-                            },
-                            complete: function() {
-                                button.find('.loading-spinner').remove();
-                            },
-                            error: function(error) {
-
-                                jQuery.toast({ text: 'An error occurred.', 
-                                    heading: 'Failed', 
-                                    icon: 'error',
-                                    showHideTransition: 'fade',
-                                    allowToastClose: true, 
-                                    hideAfter: 3000, 
-                                    stack: 5, 
-                                    position: 'top-right', 
-                                   });
-
-                            }
-                        });
-                    } else {
-                    
-                        jQuery.toast({ text: 'Please enter a blog post title', 
-                            heading: 'Failed', 
+                 /* if (isOnlyNumericOrSpecial(title)) {
+                        // Show a toast or error message for “gibberish” content
+                        $.toast({
+                            text: "Text appears to be gibberish. Please write coherent English.",
+                            heading: 'Error',
                             icon: 'error',
                             showHideTransition: 'fade',
-                            allowToastClose: true, 
-                            hideAfter: 3000, 
-                            stack: 5, 
-                            position: 'top-right', 
-                           });
-                    }
+                            allowToastClose: true,
+                            hideAfter: 3000,
+                            stack: 5,
+                            position: 'top-right',
+                            textAlign: 'left',
+                            class: 'aitite-toast'
+                        });
+                        return;
+                    } */
+
+                        const isMeaningful = await isMeaningfulText(title);
+
+                         if (!isMeaningful) {
+                           $.toast({
+                                text: 'This is meaningless text. Please write meaningfull text.',
+                                heading: 'Failed',
+                                icon: 'error',
+                                showHideTransition: 'fade',
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right'
+                            });
+                            return;
+                        }
+
+                    // Proceed with AJAX if the title is valid
+                    $.ajax({
+                        url: ajax_ob.ajax_url,
+                        method: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            action: 'otslf_generate_blog_title',
+                            blog_title: title,
+                            tlanguage: tlanguage,
+                            twstyle: twstyle,
+                            writone: writone,
+                            wvariation: wvariation,
+                            nonce: ajax_ob.nonce
+                        },
+                        beforeSend: function(xhr) {
+                            button.append('<span class="loading-spinner"></span>');
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('#generated-titles').html(
+                                    response.data.map(item => `<li>${item}</li>`).join('')
+                                );
+                                $.toast({
+                                    text: "Congratulations! Your blog title successfully generated.",
+                                    heading: 'Success',
+                                    icon: 'success',
+                                    showHideTransition: 'fade',
+                                    allowToastClose: true,
+                                    hideAfter: 300000,
+                                    stack: 15,
+                                    position: { left: 'auto', right: 100, top: 153, bottom: 'auto' },
+                                    textAlign: 'left',
+                                    loader: true,
+                                    loaderBg: '#9EC600',
+                                    class: 'aitite-toast',
+                                });
+
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 300);
+
+                            } else {
+                                $.toast({
+                                    text: 'An error: ' + response.data,
+                                    heading: 'Failed',
+                                    icon: 'error',
+                                    showHideTransition: 'fade',
+                                    allowToastClose: true,
+                                    hideAfter: 300000,
+                                    stack: 5,
+                                    position: 'top-right',
+                                    class: 'aitite-toast',
+                                });
+                            }
+                        },
+                        complete: function() {
+                            button.find('.loading-spinner').remove();
+                        },
+                        error: function(error) {
+                            $.toast({
+                                text: 'An error occurred.',
+                                heading: 'Failed',
+                                icon: 'error',
+                                showHideTransition: 'fade',
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right',
+                            });
+                        }
+                    });
                 });
             });
-        
 
+            
 
                 /* =============================== 
                         Ai Article generate 
@@ -185,7 +256,7 @@
                     let htaging = jQuery('#htaging').val();
                     let numberh = jQuery('#numberh').val();
                     let faqlist = jQuery("#faqlist").is(':checked') ? "1" : "0";
-                    let featuredImg = jQuery('#featuredImg').val();
+                    let featuredImg = jQuery('#otslf_featured_image').val();
                     let seo_keyword = jQuery('#seo_keyword').val(); 
                     let metades = jQuery('#meta_description').val();
                     let imageAPi = jQuery('#featured_image_api').val();
@@ -198,34 +269,49 @@
                     let category = jQuery('input[name="ot_taxonomy"]:checked').length;
             
                     if (countWord === '') { 
-                        jQuery('#maxerror').text('Please enter the Max words');
+                        jQuery('#maxerror').text('Please enter the Max words').fadeIn();
                         return;
                     }
                     
+                    if (!jQuery('#subheading').is(':checked')) {
+                        jQuery('#subheadingerror').text('Please check the Subheading option').fadeIn();
+                        return;
+                    }
+
                     // Only validate htaging and numberh if subheading is enabled
                     if (subheading === "1") {
-                        if (htaging === '-- Select Header --' || htaging === null) {  
+                        if (jQuery('#htaging') === 'Select Header' || htaging === null) {  
                             jQuery('#hgerror').text('Please select a valid H Group').fadeIn();
                             return;
                         }    
-                        if (numberh === '-- Select Number --' || numberh === null) {  
+                        if (jQuery('#numberh') === 'Select Number' || jQuery('#numberh') === null) {  
                             jQuery('#hnumbererror').text('Please select Number').fadeIn();
                             return;
                         }
                     }
             
-                    if (featuredImg === '-- None --' || featuredImg === null) {  
+                    if (jQuery('#htaging').val() === '' || jQuery('#htaging').val() === 'Select Header') {
+                        jQuery('#hgerror').text('Please select a valid H Group').fadeIn();
+                        return;
+                    }
+
+                    if (jQuery('#numberh').val() === '' || jQuery('#numberh').val() === 'Select Number') {
+                        jQuery('#hnumbererror').text('Please select Number').fadeIn();
+                        return;
+                    } 
+
+                    if (jQuery('#otslf_featured_image').val() === '' || jQuery('#otslf_featured_image').val() === '-- Select image type --') {  
                         jQuery('#featImg').text('Please select Featured image').fadeIn();
                         return;
                     }
             
-                    if (imageAPi === '') { 
-                        jQuery('#imgapierror').text('Please enter image Api key');
+                    if (jQuery('#featured_image_api').val() === '') { 
+                        jQuery('#imgapierror').text('Please enter image Api key').fadeIn();
                         return;
                     }
             
                     if (category === 0) { 
-                        jQuery('#caterror').text('Please select at least one category').fadeIn();
+                        jQuery('#caterror').text('Please select at least one or two categories').fadeIn();
                         return;
                     } 
                     
@@ -581,110 +667,8 @@
 
             }); 
 
-        
-            // Main article generation process after fetching keywords and meta
 
-            /* =================== old SCRIPT ================= */
-
-
-            /* function generateArticle(button, title, titlekeywords, titlemeta) {
-                console.log('In this site');
-                    
-                console.log('Generate Key', titlekeywords);
-                console.log('Generate Meta', titlemeta);
-                //alert('ssss');
-                
-                jQuery('#loading-spinner').show();
-                console.log('api call................:');
-
-                jQuery.ajax({
-                    url: ajax_ob.ajax_url,
-                    type: 'POST',
-                    dataType: 'JSON',
-                    data: {
-                        action: 'otslf_instant_generate_post_content',
-                        title: title,
-                        titlekeywords: titlekeywords, // Use the keyword
-                        titlemeta: titlemeta,        // Use the meta description
-                        nonce: ajax_ob.nonce
-                    },
-                    
-                    success: function(response) {
-                        console.log('reposne:',response);
-                        
-                        if (response.success) {
-
-                            jQuery.toast({
-                                text: response.data.message,
-                                heading: 'Success',
-                                icon: 'success',
-                                showHideTransition: 'fade',
-                                allowToastClose: true,
-                                hideAfter: 3000,
-                                stack: 5,
-                                position: 'top-right'
-                            });
-        
-                            localStorage.setItem('successMessage', response.data.message);
-
-                            //location.reload(); 
-                             
-                            console.log('Success message');
-                        } else {
-                            jQuery.toast({
-                                text: response.data.message,
-                                heading: 'Failed',
-                                icon: 'error',
-                                showHideTransition: 'fade',
-                                allowToastClose: true,
-                                hideAfter: 3000,
-                                stack: 5,
-                                position: 'top-right'
-                            });
-                        }
-                    },
-                   
-                    error: function(xhr, status, error) {
-                        if (typeof error.code === 'undefined') {
-                            jQuery.toast({
-                                text: "Please check your OpenAI key, it might be invalid",
-                                heading: 'Failed',
-                                icon: 'error',
-                                showHideTransition: 'fade',
-                                allowToastClose: true,
-                                hideAfter: 3000,
-                                stack: 5,
-                                position: 'top-right'
-                            });
-                        } else {
-                            jQuery.toast({
-                                text: error.code,
-                                heading: 'Failed',
-                                icon: 'error',
-                                showHideTransition: 'fade',
-                                allowToastClose: true,
-                                hideAfter: 3000,
-                                stack: 5,
-                                position: 'top-right'
-                            });
-                        }
-                    },
-                    complete: function() {
-                        console.log('complete:');
-
-                        button.find('.loading-spinner').remove();
-                    }
-
-                });    
-            }         
             
-            let successMessage = localStorage.getItem('successMessage');
-            if (successMessage) {
-                jQuery('#status-message').html('<div class="success-message">' + successMessage + '</div>');
-                localStorage.removeItem('successMessage');
-            } */
-
-               
            /* ==============================  
                       Delete Script 
             ===============================*/
@@ -827,97 +811,103 @@
                     /* ====================================  
                           Multiple title Delete Script 
                     ======================================*/
-
             jQuery(document).ready(function($) {
-                jQuery('#select_title').click(function() {
-                    let isChecked = jQuery(this).is(':checked');
-                    jQuery('input[name="select_title[]"]').prop('checked', isChecked);
-                });          
-                jQuery('#delete-selected').click(function(e) {
+                // Handle "select all" checkbox
+                $('#select_title').click(function() {
+                    let isChecked = $(this).is(':checked');
+                    $('input[name="select_title[]"]').prop('checked', isChecked);
+                });
+
+                // Handle "Delete Selected" button click
+                $('#delete-selected').click(function(e) {
                     e.preventDefault();
 
-                    let id = jQuery('input[name="select_title[]"]:checked').map(function() {
-                        return jQuery(this).val();
+                    let ids = $('input[name="select_title[]"]:checked').map(function() {
+                        return $(this).val();
                     }).get();
-            
-                    if (id.length === 0) {
-                        jQuery.toast({ text: "Please select at least one title to delete.", 
-                        heading: 'Failed', 
-                        icon: 'error',
-                        showHideTransition: 'fade',
-                        allowToastClose: true, 
-                        hideAfter: 3000, 
-                        stack: 5, 
-                        position: 'top-right', 
-                       });                        
+
+                    console.log('Selected IDs:', ids);
+
+                    if (ids.length === 0) {
+                        $.toast({
+                            text: "Please select at least one title to delete.",
+                            heading: 'Failed',
+                            icon: 'error',
+                            showHideTransition: 'fade',
+                            allowToastClose: true,
+                            hideAfter: 3000,
+                            stack: 5,
+                            position: 'top-right'
+                        });
+                        return;
                     }
-            
-                    jQuery.ajax({
+
+                    $.ajax({
                         url: ajax_ob.ajax_url,
                         type: 'POST',
                         data: {
-                            action: 'slf_delete_multiple_blog_title',
-                            id: id,
+                            action: 'otslf_delete_multiple_blog_title',
+                            id: ids,
                             nonce: ajax_ob.nonce
                         },
-                        beforeSend: function(xhr) {
-                            jQuery('#delete-selected').append('<span class="loading-spinner"></span>');
+                        beforeSend: function() {
+                            $('#delete-selected').append('<span class="loading-spinner"></span>');
                         },
                         success: function(response) {
+                            console.log('Response:', response);
+
                             if (response.success) {
-                                jQuery('input[name="select_title[]"]:checked').closest('tr').remove();
-                                jQuery.toast({
-                                    text: "!Selected Title Deleted Successfully",
-                                    heading: 'success', 
-                                    icon: 'success', 
-                                    showHideTransition: 'fade', 
-                                    allowToastClose: true, 
-                                    hideAfter: 4000, 
-                                    stack: 15, 
-                                    position: { left : 'auto', right : 100, top : 153, bottom : 'auto' },
-                                    textAlign: 'left',
-                                    loader: true, 
-                                    loaderBg: '#9EC600', 
+                                $('input[name="select_title[]"]:checked').closest('tr').remove();
+
+                                $.toast({
+                                    text: response.data.message || "Selected Title(s) Deleted Successfully.",
+                                    heading: 'Success',
+                                    icon: 'success',
+                                    showHideTransition: 'fade',
+                                    allowToastClose: true,
+                                    hideAfter: 4000,
+                                    position: 'top-right'
                                 });
-                                
+
                                 setTimeout(function() {
                                     location.reload();
                                 }, 2000); 
 
                             } else {
-                                jQuery.toast({ text: "Please select at least one title to delete.", 
-                                    heading: 'Failed', 
+                                $.toast({
+                                    text: response.data?.message || "Failed to delete selected titles.",
+                                    heading: 'Failed',
                                     icon: 'error',
                                     showHideTransition: 'fade',
-                                    allowToastClose: true, 
-                                    hideAfter: 3000, 
-                                    stack: 5, 
-                                    position: 'top-right', 
+                                    allowToastClose: true,
+                                    hideAfter: 3000,
+                                    stack: 5,
+                                    position: 'top-right'
                                 });
                             }
                         },
-                      
                         complete: function() {
-                            jQuery('#delete-selected').find('.loading-spinner').remove();
+                            $('#delete-selected').find('.loading-spinner').remove();
                         },
-
                         error: function(xhr, status, error) {
-                            jQuery.toast({ text: 'An error occurred: ' + error, 
-                                heading: 'NOTE', 
+                            console.error('AJAX error:', error);
+                            $.toast({
+                                text: 'An error occurred: ' + error,
+                                heading: 'Error',
                                 icon: 'error',
                                 showHideTransition: 'fade',
-                                allowToastClose: true, 
-                                hideAfter: 3000, 
-                                stack: 5, 
-                                position: 'top-right', 
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right'
                             });
                         }
                     });
                 });
             });
-            
-                
-            
+
+    
+
                     /*===========================  
                             vertical tab 
                     ========================== */
@@ -944,8 +934,13 @@
 
                     jQuery(document).ready(function() {
                         jQuery('.copy-title').on('click', function() {
+                            console.log('Copy button clicked');
+                                
                             var title = jQuery(this).data('title');
                             var tempInput = jQuery('<input>');
+
+                            console.log(tempInput);
+                            
                             jQuery('body').append(tempInput);
                             tempInput.val(title).select();
                             document.execCommand('copy');
@@ -1102,104 +1097,174 @@
                       Instant Article 
                 ======================= */
 
-                jQuery(document).ready(function($) {
-                    jQuery('#instanttitle').on('click', function() {
-                        var button = jQuery(this);
-                        console.log('---999---');
-                        var title = jQuery('#prompt').val();
+                /* Meaningless Word Detection */   
+
+                async function isMeaningfulText(text) {
+                    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Bearer " + ajax_ob.apikey,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            //model: "gpt-4o",
+                            model: ajax_ob.aimodel,
+                            messages: [
+                                {
+                                    role: "system",
+                                    content: "You are a multilingual language and meaning detector. Reply ONLY with 'yes' or 'no'. If the text is coherent and meaningful in any language, reply 'yes'. If it looks like gibberish, random characters, or has no clear meaning in any known language, reply 'no'. Do not explain anything."
+                                },
+                                {
+                                    role: "user",
+                                    content: `Is this sentence meaningful in any language? "${text}"`
+                                }
+                            ],
+                            temperature: 0
+                        })
+                    });
+
+                    const data = await response.json();
+                    const answer = data.choices[0].message.content.trim().toLowerCase();
+                    return answer === "yes";
+                }
+
                 
-                        if (title) {
-                            jQuery('#loading-spinner').show();
-                            jQuery.ajax({
-                                url: ajax_ob.ajax_url,
-                                method: 'POST',
-                                dataType: 'JSON',
-                                data: {
-                                    action: 'otslf_instant_title_generate',
-                                    title: title,
-                                    nonce: ajax_ob.nonce
-                                },
-                                beforeSend: function() {
-                                    console.log('button', button);
-                                    button.append('<span class="loading-spinner"></span>');
-                                },
-                                success: function(response) {
-                                    jQuery('#loading-spinner').hide();
-                                    
-                                    if (response.success) {
-                                        console.log('---101---');
-                                        console.log(response.success);
+                jQuery(document).ready( function($) {
+                    var $promptField = $('#prompt');
+                    var $instantBtn  = $('#instanttitle');
+                    var $loading     = $('#loading-spinner');
 
-                                        if (!response.success || response.success === '0') {
-                                            jQuery('#generatetitle').hide(); 
-                                        } else {
-                                            jQuery('#generatetitle').show(); 
-                                        }
+                    // Helper: returns true if text is ONLY digits, whitespace, or special characters
+                    /* function isOnlyNumericOrSpecial(text) {
+                        return /^\s*[\d\W]+\s*$/.test(text);
+                    } */
 
-                                        jQuery('#ptitle').html(title);                                      
-                                        var generatedContent = response.data.map(function(item) {
-                                            return `
-                                            <div class="tooltip">
-                                                <li>
-                                                    <input type="radio" class="select-title" name="select-title" data-title="${item}" />  
-                                                    <input type="text" id="blog_titles" name="blog_titles" value="${item}">
-                                                </li>
-                                                <div class="tooltiptext">
-                                                    <button type="button" class="update-title gtbutten" title="update" data-title="${item}">
-                                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" clip-rule="evenodd" d="m14.114 4.162-2.276-2.27a1.9 1.9 0 0 0-1.346-.559H3.239a1.91 1.91 0 0 0-1.906 1.906v9.522c0 1.05.855 1.906 1.906 1.906h9.529c1.05 0 1.899-.855 1.899-1.906V5.508a1.9 1.9 0 0 0-.553-1.346M10.808 2.62v1.596c0 .08-.067.148-.155.148h-5.3a.15.15 0 0 1-.154-.148v-1.67h5.293q.173.001.316.074m0 10.835h-5.63a.6.6 0 0 0 .02-.149V9.892c0-.08.068-.148.155-.148h5.3a.15.15 0 0 1 .155.148zm2.646-.694c0 .384-.31.694-.686.694h-.748V9.892c0-.754-.613-1.36-1.367-1.36h-5.3c-.754 0-1.367.606-1.367 1.36v3.414c0 .048.007.101.02.149H3.24a.693.693 0 0 1-.694-.694V3.239c0-.384.31-.693.694-.693h.747v1.67c0 .747.613 1.36 1.367 1.36h5.3c.754 0 1.367-.613 1.367-1.36v-.431l1.232 1.232c.135.128.202.31.202.491z" fill="#666"/>
-                                                        </svg>
-                                                    </button>
-                                                    <button type="button" class="copy-title gtbutten" title="copy" data-title="${item}">
+                    // We no longer disable/enable the button on input.
+                    // Instead, always leave it enabled and validate on click.
+
+                    // On click of #instanttitle
+                    $instantBtn.on('click', async function(e) {
+                        e.preventDefault();
+                        var button = $(this);
+                        var title  = $promptField.val().trim();
+
+                        // Final validation before AJAX:
+                        if (title === '') {
+                            $.toast({
+                                text: 'Please enter a title.',
+                                heading: 'Failed',
+                                icon: 'error',
+                                showHideTransition: 'fade',
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right'
+                            });
+                            return;
+                        }
+                        /* if (isOnlyNumericOrSpecial(title)) {
+                            $.toast({
+                                text: 'Text appears to be gibberish. Please write coherent English.',
+                                heading: 'Failed',
+                                icon: 'error',
+                                showHideTransition: 'fade',
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right'
+                            });
+                            return;
+                        } */
+                        //alert("Meaningful Text Detection in Progress...");    
+
+                        const isMeaningful = await isMeaningfulText(title);
+
+                         if (!isMeaningful) {
+                           $.toast({
+                                text: 'This is meaningless text. Please write meaningfull text.',
+                                heading: 'Failed',
+                                icon: 'error',
+                                showHideTransition: 'fade',
+                                allowToastClose: true,
+                                hideAfter: 3000,
+                                stack: 5,
+                                position: 'top-right'
+                            });
+                            return;
+                        }  
+
+
+                        console.log('---999---');
+                        $loading.show();
+
+                        $.ajax({
+                            url: ajax_ob.ajax_url,
+                            method: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                action: 'otslf_instant_title_generate',
+                                title: title,
+                                nonce: ajax_ob.nonce
+                            },
+                            beforeSend: function() {
+                                console.log('button', button);
+                                button.append('<span class="loading-spinner"></span>');
+                            },
+                            success: function(response) {
+                                $loading.hide();
+
+                                if (response.success) {
+                                    console.log('---101---');
+
+                                    // Show or hide the #generatetitle element correctly:
+                                    if (!response.success || response.success === '0') {
+                                        $('#generatetitle').hide();
+                                    } else {
+                                        $('#generatetitle').show();
+                                    }
+
+                                    $('#ptitle').html(title);
+
+                                    // Build the generated titles list
+                                    var generatedContent = response.data.map(function(item) {
+                                        return `
+                                        <div class="tooltip">
+                                            <li>
+                                                <input type="radio" class="select-title" 
+                                                    name="select-title" data-title="${item}" />
+                                                <input type="text" id="blog_titles" 
+                                                    name="blog_titles" value="${item}">
+                                            </li>
+                                                <div class="tooltiptext">                                                    
+                                                    <button type="button" class="copy-generat-title gtbutten" title="copy" data-title="${item}">
                                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M2.516 6.516c-.357.357-.583.976-.583 2.084v2.8c0 1.107.226 1.727.583 2.084s.977.583 2.084.583h2.8c1.108 0 1.727-.226 2.084-.583.358-.357.583-.977.583-2.084V8.6c0-1.108-.225-1.727-.583-2.084-.357-.358-.976-.583-2.084-.583H4.6c-1.107 0-1.727.225-2.084.583m-.849-.849c.693-.692 1.707-.934 2.933-.934h2.8c1.226 0 2.24.242 2.933.934s.934 1.707.934 2.933v2.8c0 1.226-.242 2.24-.934 2.932-.693.693-1.707.935-2.933.935H4.6c-1.226 0-2.24-.242-2.933-.934S.733 12.625.733 11.4V8.6c0-1.226.242-2.24.934-2.933" fill="#666"/>
                                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M6.516 2.516c-.357.357-.583.976-.583 2.084v.133H7.4c1.226 0 2.24.242 2.933.934s.934 1.707.934 2.933v1.467h.133c1.108 0 1.727-.226 2.084-.583.358-.357.583-.977.583-2.084V4.6c0-1.108-.225-1.727-.583-2.084-.357-.358-.976-.583-2.084-.583H8.6c-1.107 0-1.727.225-2.084.583m-.849-.849C6.36.975 7.374.733 8.6.733h2.8c1.226 0 2.24.242 2.933.934s.934 1.707.934 2.933v2.8c0 1.226-.242 2.24-.934 2.932-.693.693-1.707.935-2.933.935h-.733a.6.6 0 0 1-.6-.6V8.6c0-1.108-.225-1.727-.583-2.084-.357-.358-.976-.583-2.084-.583H5.333a.6.6 0 0 1-.6-.6V4.6c0-1.226.242-2.24.934-2.933" fill="#666"/>
                                                         </svg>
                                                     </button>                              
                                                 </div>
-                                            </div>`;
-                                        }).join('');
-                                
-                                        jQuery.toast({
-                                            text: "Title Generated Successfully!",
-                                            heading: 'Success',
-                                            icon: 'success',
-                                            showHideTransition: 'fade',
-                                            allowToastClose: true,
-                                            hideAfter: 4000,
-                                            stack: 15,
-                                            position: { left: 'auto', right: 100, top: 153, bottom: 'auto' },
-                                            textAlign: 'left',
-                                            loader: true,
-                                            loaderBg: '#9EC600'
-                                        });
-                                        
-                                        jQuery('#gtitle').html(generatedContent).show();
+                                        </div>`;
+                                    }).join('');
 
-                                        //$('#generatedTitlesModal').fadeIn();
-                                    } else {
-                                        jQuery('#show-error').html('An error: ' + response.data).show();
-                
-                                        jQuery.toast({
-                                            text: response.data,
-                                            heading: 'Failed',
-                                            icon: 'error',
-                                            showHideTransition: 'fade',
-                                            allowToastClose: true,
-                                            hideAfter: 3000,
-                                            stack: 5,
-                                            position: 'top-right'
-                                        });
-                                    }
-                                },
-                                complete: function() {
-                                    button.find('.loading-spinner').remove();
-                                },
-                                error: function() {
-                                    jQuery('#loading-spinner').hide();
-                                    /* $('#show-error').html('<p>An error occurred.</p>').show(); */
-                                    jQuery.toast({
-                                        text: 'An error occurred.',
+                                    $.toast({
+                                        text: "Title Generated Successfully!",
+                                        heading: 'Success',
+                                        icon: 'success',
+                                        showHideTransition: 'fade',
+                                        allowToastClose: true,
+                                        hideAfter: 4000,
+                                        stack: 15,
+                                        position: { left: 'auto', right: 100, top: 153, bottom: 'auto' },
+                                        textAlign: 'left',
+                                        loader: true,
+                                        loaderBg: '#9EC600'
+                                    });
+
+                                    $('#gtitle').html(generatedContent).show();
+                                } else {
+                                    $('#show-error').html('An error: ' + response.data).show();
+                                    $.toast({
+                                        text: response.data,
                                         heading: 'Failed',
                                         icon: 'error',
                                         showHideTransition: 'fade',
@@ -1209,28 +1274,85 @@
                                         position: 'top-right'
                                     });
                                 }
-                            });
-                        } else {
-                            jQuery.toast({
-                                text: 'Please enter a blog post title',
-                                heading: 'Failed',
-                                icon: 'error',
-                                showHideTransition: 'fade',
-                                allowToastClose: true,
-                                hideAfter: 3000,
-                                stack: 5,
-                                position: 'top-right'
-                            });
-                        }
+                            },
+                            complete: function() {
+                                button.find('.loading-spinner').remove();
+                            },
+                            error: function() {
+                                $loading.hide();
+                                $.toast({
+                                    text: 'An error occurred.',
+                                    heading: 'Failed',
+                                    icon: 'error',
+                                    showHideTransition: 'fade',
+                                    allowToastClose: true,
+                                    hideAfter: 3000,
+                                    stack: 5,
+                                    position: 'top-right'
+                                });
+                            }
+                        });
                     });
-                
-                    jQuery(document).on('click', '.select-title', function() {
-                        var selectedTitle = jQuery(this).data('title');
-                        jQuery('#prompt').val(selectedTitle);
+
+                    // If user clicks a generated title radio, populate #prompt with that title
+                    $(document).on('click', '.select-title', function() {
+                        var selectedTitle = $(this).data('title');
+                        $promptField.val(selectedTitle).trigger('input');
                     });
                 });
+
+
+
+
                 
-                                
+
+
+
+
+
+
+                /*================================================
+                      text copy from Article generte section
+                ================================================= */
+                
+
+                jQuery(document).ready(function ($) {
+                    $(document).on('click', '.copy-generat-title', function () {
+                        // Go up to .tooltip, then find the input with name blog_titles
+                        const inputField = $(this).closest('.tooltip').find('input[name="blog_titles"]');
+                        const textToCopy = inputField.val();
+
+                        if (!textToCopy) {
+                            console.warn('Nothing to copy or input not found.');
+                            return;
+                        }
+                        const tempInput = $('<input>');
+                        $('body').append(tempInput);
+                        tempInput.val(textToCopy).select();
+
+                        try {
+                            document.execCommand('copy');
+                            console.log('Copied:', textToCopy);
+                        } catch (err) {
+                            console.error('Copy failed:', err);
+                        }
+                        showToast("Copied");
+                        tempInput.remove();
+                    });
+
+                    function showToast(message) {
+                            var toast = jQuery('<div class="toast-message"></div>').text(message);
+                            jQuery('body').append(toast);
+                            toast.fadeIn(400).delay(2000).fadeOut(400, function() {
+                                jQuery(this).remove();
+                            });
+                        }
+                });
+
+
+
+
+
                 /*================================================
                          Setting page Schedule Post
                 ================================================= */
@@ -1297,18 +1419,23 @@
                     let row = jQuery(this).closest('tr');
                     let confirmation = confirm("Are you sure you want to delete this title?");
                     
+                    console.log("Delete button clicked for ID:", id);
+
                     if (confirmation) {
                         jQuery.ajax({
                             url: ajax_ob.ajax_url,
                             type: 'POST',
                             dataType: 'json',
                             data: {
-                                action: 'slf_delete_log_title',
+                                action: 'otslf_delete_log_title',
                                 id: id,
                                 nonce: ajax_ob.nonce
                             },
                             success: function(response) {
                                 if (response.success) {
+                                    
+                                    console.log("Response data:", response.data);
+
                                     row.remove();
                                     jQuery.toast({
                                         text: "! Title Deleted Successfully",
@@ -1323,6 +1450,11 @@
                                         loader: true, 
                                         loaderBg: '#9EC600', 
                                     });
+
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 2000); 
+
                                 } else {
                                    
                                     jQuery.toast({
@@ -1699,7 +1831,7 @@
                           });
                                                    
                         jQuery('#prompt').on('input', function() {
-                            jQuery('#instanttitle').removeClass('atdisabled').addClass('enabled').prop('atdisabled', false);          
+                            jQuery('#instanttitle').removeClass('disabled').addClass('enabled').prop('disabled', false);          
                            });   
 
                         jQuery('#woprompt').on('input', function() {

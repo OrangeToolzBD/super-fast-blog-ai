@@ -136,6 +136,7 @@
                 $formatted_publish_time = $date_in_user_timezone->format('Y-m-d g:i a');
 
             } elseif ($schedule === 'recurring') {
+                
                 $recurdate = get_option('otslf_recurdate');
                 $rcuroclock = get_option('otslf_rcuroclock');
                 $publish_time = $date_in_utc->modify('+' . intval($recurdate) . ' days');

@@ -44,11 +44,11 @@ class Class_Articlegenerate {
                           <h1><?php esc_html_e('Blog Generate', 'super-fast-blog-ai');?></h1>
                       </div>
                       <div class="col-4 publish_link">
-                       <?php
+                        <?php
                             global $wpdb;
                             $schedule_post = $wpdb->prefix . 'slf_schedule_post_title_log';
                             $last_row = wp_cache_get('last_schedule_post_row');
-
+                            
                             if ($last_row === false) {
                                 $last_row = $wpdb->get_row(
                                   $wpdb->prepare( "SELECT * FROM `{$schedule_post}` WHERE indicat = %s ORDER BY log_time DESC LIMIT 1", 'yes' )
@@ -66,14 +66,11 @@ class Class_Articlegenerate {
                                 
                                 wp_cache_delete('last_schedule_post_row');
                             }
-
-
                             if ($last_row) {
                               $edit_url = admin_url('post.php?post=' . $last_row->postid . '&action=edit');
                               echo '<a href="' . esc_url($edit_url) . '" data-postid="' . esc_attr($last_row->postid) . '" target="_blank">'. esc_html__('Please click the link for edit or preview the article.','super-fast-blog-ai'). '</a>';
                             }    
-
-                        ?>
+                         ?>
                       </div>
                   </div>
 
@@ -113,7 +110,7 @@ class Class_Articlegenerate {
                                 </div>
                               </div>
                               <div class="generate-title-wrap">
-                                <button class="btn" id="instanttitle" name="instanttitle">
+                                <button class="btn disabled" disabled id="instanttitle" name="instanttitle">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none">
                                       <path d="M11.403 6.027a5.32 5.32 0 0 1-4.114-4.114.548.548 0 0 0-1.073 0 5.32 5.32 0 0 1-4.114 4.114.548.548 0 0 0 0 1.072 5.32 5.32 0 0 1 4.114 4.115.548.548 0 0 0 1.072 0 5.32 5.32 0 0 1 4.115-4.115.548.548 0 0 0 0-1.072m-.906 9.049a2.51 2.51 0 0 1-1.938-1.938.548.548 0 0 0-1.072 0 2.51 2.51 0 0 1-1.939 1.938.548.548 0 0 0 0 1.072 2.51 2.51 0 0 1 1.939 1.939.548.548 0 0 0 1.072 0 2.51 2.51 0 0 1 1.938-1.939.548.548 0 0 0 0-1.072m7.401-5.072a3.39 3.39 0 0 1-2.62-2.62.548.548 0 0 0-1.072 0 3.39 3.39 0 0 1-2.62 2.62.548.548 0 0 0 0 1.073 3.39 3.39 0 0 1 2.62 2.62.548.548 0 0 0 1.072 0 3.39 3.39 0 0 1 2.62-2.62.548.548 0 0 0 0-1.073" fill="#fff"/>
                                     </svg>
@@ -180,225 +177,228 @@ class Class_Articlegenerate {
                         </div>
                         <div class="language input-selected">
                           
-                        <p><?php esc_html_e('Word Count', 'super-fast-blog-ai'); ?>
-                          <span class="redmark"> <?php echo esc_html('*'); ?>&nbsp;&nbsp; </span>
-                          <span class="subheading">
-                              <?php 
-                            
-                              printf(        /* translators: %1$s is the minimum word count, %2$s is the maximum word count */
-                                esc_html__('Minimum Words for an article: %1$s, %2$s', 'super-fast-blog-ai'), 
-                                '1000',
-                                '2000'
-                              );
-                            ?>
-                          </span>
-                        </p>
-                          <div class="option-field">
-                          <input type="number" id="countWord" name="countWord" placeholder="500"/>
-                        </div>
-                          <small class="error-message" id="maxerror"></small>
-                          </div>
-                      </div>
-
-                      <div class="input-container">
-                        <h6 class=""><?php esc_html_e('Sub Heading', 'super-fast-blog-ai'); ?></h6>
-                        <label for="checkbox" class="checkbox-container">
-                          <input type="checkbox" id="subheading" value="1" name="subheading"/>
-                          <span class="checkmark"></span>
-                        </label>
-                      </div>
-
-                      <div class="sub-heading-inner">
-                        <div class="blog-variation-select" id="vcontent">
-                          <div class="language input-selected">
-                            <label for="select"><p><?php esc_html_e('Heading Tag', 'super-fast-blog-ai'); ?><span class="redmark">*</span> </p></label> 
-                            <div class="custom-select">
-                            <div class="option-field">
-                                  <select id="htaging" name="htaging">
-                                      <option selected>Select Header</option>
-                                      <option value="h2">H2</option>
-                                      <option value="h3">H3</option>
-                                      <option value="h4">H4</option>
-                                      <option value="h5">H5</option>
-                                      <option value="h6">H6</option>
-                                    </select>
-                            </div>
-                        </div>
-                            <small class="error-message" id="hgerror"></small>
-                          </div>
-                          <div class="language input-selected" style="margin-top:9px;">
-                            <label for="select"> 
-                              <p><?php esc_html_e('Number of Heading', 'super-fast-blog-ai'); ?> <span class="redmark"><?php echo esc_html('*'); ?></span></p>
-                            </label>
-                            <div class="custom-select">
-                            <div class="option-field">
-                            <select id="numberh" name="numberh">
-                                      <option  selected>Select Number</option>
-                                      <option value="1">1</option>
-                                      <option value="2">2</option>
-                                      <option value="3">3</option>
-                                      <option value="4">4</option>
-                                      <option value="5">5</option>
-                                      <option value="6">6</option>
-                                      <option value="7">7</option>
-                                      <option value="8">8</option>
-                                      <option value="9">9</option>
-                                      <option value="10">10</option>
-                                      <option value="11">11</option>
-                                      <option value="12">12</option>
-                              </select>
-                            </div>
-                            </div>
-                            <small class="error-message" id="hnumbererror"></small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="input-container">
-                        <h6 class=""><?php esc_html_e('Article FAQ', 'super-fast-blog-ai'); ?></h6>
-                        <label for="checkbox" class="checkbox-container">
-                          <input type="checkbox" id="faqlist" value="1" name="faqlist"/>
-                          <span class="checkmark"></span>
-                        </label>
-                      </div>
-                    </div>
-                    <!-- Image Generation  -->
-                    <div class="image_accordion_wrapper">
-                      <button class="accordion image-generation-btn">
-                        <?php esc_html_e('Image Generate', 'super-fast-blog-ai'); ?>
-                        <span class="slf-arrow">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
-                        </span>
-                      </button>
-                      <div class="image-generation-wrap panel">
-                        <div class="image-generation-inner">
-                          <div class="blog-variation-select">
-                            <div id="vcontent">
-                            <label for="select">
-                              <p>
-                                  <?php esc_html_e('Featured Image', 'super-fast-blog-ai'); ?>
-                                  <span class="redmark"><?php echo esc_html('*'); ?></span>
-                              </p>
-                            </label>
-                              <div class="custom-select">
-                                <select id="otslf_featured_image" name="slf_featured_image">
-                                  <option selected>-- None --</option>
-                                  <option value="dalle3">DALL-E 3</option>
-                                  <option value="pixabay">Pixabay</option>
-                                </select><br> 
-                                <small class="error-message" id="featImg"></small>
-                              </div>
-                            </div>
-
-                            <div id="otslf_image_generate_api_key">
-                              <label for="select">
-                                <p>
-                                    <?php esc_html_e('Image API key', 'super-fast-blog-ai'); ?>
-                                    <span class="redmark"><?php echo esc_html('*'); ?></span>
-                                    &nbsp;&nbsp;
-                                    <a href="<?php echo esc_url('https://pixabay.com/api/docs/'); ?>" 
-                                      target="_blank"
-                                      rel="noopener noreferrer">
-                                        <?php esc_html_e('Get Api key', 'super-fast-blog-ai'); ?>
-                                    </a>
-                                </p>
-                              </label>
+                            <p><?php esc_html_e('Word Count', 'super-fast-blog-ai'); ?>
+                              <span class="redmark"> <?php echo esc_html('*'); ?>&nbsp;&nbsp; </span>
+                              <!-- <span class="subheading">
+                                  <?php 
                                 
-                              <div id="otslf_image_generate_api_key">
-                                <input type="password" name="featured_image_api" id="featured_image_api" placeholder="">  
-                                <small class="error-message" id="imgapierror"></small>
+                                  /* printf(       
+                                    esc_html__('Minimum Words for an article: %1$s, %2$s', 'super-fast-blog-ai'), 
+                                    '1000',
+                                    '2000' 
+                                  );*/
+                                ?>
+                              </span> -->
+                            </p>
+                              <div class="option-field">
+                              <input type="number" id="countWord" name="countWord" placeholder="Enter at least 100 words"/>
+                            </div>
+                                <small class="error-message" id="maxerror"></small>
                               </div>
-                            </div>               
-                          <div id="otslf_dall3_generate_api_key" class="dalle_image">                      
-                                Openai API will be used, don't use other Api.                
-                          </div>  
-                        </div>
-                      </div>
-                    </div>
+                          </div>
 
-                      <button class="accordion image-generation-btn">
-                        <?php esc_html_e('SEO','super-fast-blog-ai')?> 
-                        <span class="slf-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
-                        </span>
-                      </button>
-
-                      <div class="image-generation-wrap panel">
-                        <div class="image-generation-inner">
-                          <div class="blog-post">
-                            <div class="textarea-content">
-                            <label for="textarea"><?php esc_html_e('Five keywords will be generated separet by comma (You can edit & modify those keywords)','super-fast-blog-ai')?></label> 
+                          <div class="input-container">
+                            <h6 class=""><?php esc_html_e('Sub Heading', 'super-fast-blog-ai'); ?></h6>
+                            <label for="checkbox" class="checkbox-container">
+                              <input type="checkbox" id="subheading" value="1" name="subheading"/>
+                              <span class="checkmark"></span>
+                            </label>
+                            
+                          </div>
+                          <span id="subheadingerror" class="error-message"></span>
+                          <div class="sub-heading-inner">
+                            <div class="blog-variation-select" id="vcontent">
+                              <div class="language input-selected">
+                                <label for="select"><p><?php esc_html_e('Heading Tag', 'super-fast-blog-ai'); ?><span class="redmark">*</span> </p></label> 
+                                <div class="custom-select">
+                                <div class="option-field">
+                                      <select id="htaging" name="htaging" required>
+                                          <option selected>Select Header</option>
+                                          <option value="h2">H2</option>
+                                          <option value="h3">H3</option>
+                                          <option value="h4">H4</option>
+                                          <option value="h5">H5</option>
+                                          <option value="h6">H6</option>
+                                        </select>
+                                </div>
                             </div>
-                            <textarea name="seo_keyword" id="seo_keyword" placeholder="Write some keyword or phrase relevant to your blog or +to add"></textarea><br>
-                            <small class="error-message" id="keyword_limit"></small>
-                            <div class="textarea-content meta-description-field">
-                              <label for="textarea"><?php esc_html_e('Meta Description Generated Limit 160 Characters','super-fast-blog-ai')?> </label>  
-                            </div>
-                            <textarea name="meta_description" id="meta_description" placeholder="Meta Description"></textarea>
-                            <small class="error-message" id="limit_message"></small>
-                            <div class="btn-wrap">
-                              <button class="seokeyword btn">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><path d="M11.403 6.027a5.32 5.32 0 0 1-4.114-4.114.548.548 0 0 0-1.073 0 5.32 5.32 0 0 1-4.114 4.114.548.548 0 0 0 0 1.072 5.32 5.32 0 0 1 4.114 4.115.548.548 0 0 0 1.072 0 5.32 5.32 0 0 1 4.115-4.115.548.548 0 0 0 0-1.072m-.906 9.049a2.51 2.51 0 0 1-1.938-1.938.548.548 0 0 0-1.072 0 2.51 2.51 0 0 1-1.939 1.938.548.548 0 0 0 0 1.072 2.51 2.51 0 0 1 1.939 1.939.548.548 0 0 0 1.072 0 2.51 2.51 0 0 1 1.938-1.939.548.548 0 0 0 0-1.072m7.401-5.072a3.39 3.39 0 0 1-2.62-2.62.548.548 0 0 0-1.072 0 3.39 3.39 0 0 1-2.62 2.62.548.548 0 0 0 0 1.073 3.39 3.39 0 0 1 2.62 2.62.548.548 0 0 0 1.072 0 3.39 3.39 0 0 1 2.62-2.62.548.548 0 0 0 0-1.073" fill="#7328F2"/></svg>
-                                <?php esc_html_e('keyword Generate','super-fast-blog-ai')?> 
-                              </button>
+                                <small class="error-message" id="hgerror"></small>
+                              </div>
+                              <div class="language input-selected" style="margin-top:9px;">
+                                <label for="select"> 
+                                  <p><?php esc_html_e('Number of Heading', 'super-fast-blog-ai'); ?> <span class="redmark"><?php echo esc_html('*'); ?></span></p>
+                                </label>
+                                <div class="custom-select">
+                                <div class="option-field">
+                                <select id="numberh" name="numberh" required>
+                                          <option  selected>Select Number</option>
+                                          <option value="1">1</option>
+                                          <option value="2">2</option>
+                                          <option value="3">3</option>
+                                          <option value="4">4</option>
+                                          <option value="5">5</option>
+                                          <option value="6">6</option>
+                                          <option value="7">7</option>
+                                          <option value="8">8</option>
+                                          <option value="9">9</option>
+                                          <option value="10">10</option>
+                                          <option value="11">11</option>
+                                          <option value="12">12</option>
+                                  </select>
+                                </div>
+                                </div>
+                                <small class="error-message" id="hnumbererror"></small>
+                              </div>
                             </div>
                           </div>
+
+                          <div class="input-container">
+                            <h6 class=""><?php esc_html_e('Article FAQ', 'super-fast-blog-ai'); ?></h6>
+                            <label for="checkbox" class="checkbox-container">
+                              <input type="checkbox" id="faqlist" value="1" name="faqlist"/>
+                              <span class="checkmark"></span>
+                            </label>
+                          </div>
                         </div>
-                      </div>
+                        <!-- Image Generation  -->
+                        <div class="image_accordion_wrapper">
+                          <button class="accordion image-generation-btn">
+                            <h5> <?php esc_html_e('Image Generate', 'super-fast-blog-ai'); ?> <span class="redmark">*</span> </h5>
+                            <span class="slf-arrow">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
+                            </span>
+                          </button>
+                          <div class="image-generation-wrap panel">
+                            <div class="image-generation-inner">
+                              <div class="blog-variation-select">
+                                <div id="vcontent">
+                                <label for="select">
+                                  <p>
+                                      <?php esc_html_e('Featured Image', 'super-fast-blog-ai'); ?>
+                                      <!-- <span class="redmark"><?php //echo esc_html('*'); ?></span>-->
+                                  </p>
+                                </label>
+                                  <div class="custom-select">
+                                    <select id="otslf_featured_image" name="slf_featured_image" required>
+                                      <option selected>-- Select image type --</option>
+                                      <option value="dalle3">DALL-E 3</option>
+                                      <option value="pixabay">Pixabay</option>
+                                    </select><br> 
+                                    <small class="error-message" id="featImg"></small>
+                                  </div>
+                                </div>
 
-                      <!-- Publish to post   -->
-                      <button class="accordion image-generation-btn">
-                        <?php esc_html_e('Publish to Post','super-fast-blog-ai')?>                                     
-                        <span class="slf-arrow">
-                          <!-- &#9660; -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
-                        </span>
-                      </button>
-
-                      <div class="image-generation-wrap panel schedule-wrap">
-                        <div class="image-generation-inner">
-                          <div class="category-inner col2">
-                            <div class="input-container">
-                              <h6><?php esc_html_e('Category','super-fast-blog-ai')?> <span class="redmark">*</span></h6> 
-                            </div>
-                            <div class="category-checkbox-inner">
-                              <?php 
-                                    $terms = get_terms(array(
-                                      'taxonomy' => 'category', 
-                                      'hide_empty' => false, 
-                                    ));
+                                <div id="otslf_image_generate_api_key">
+                                  <label for="select">
+                                    <p>
+                                        <?php esc_html_e('Image API key', 'super-fast-blog-ai'); ?>
+                                        <span class="redmark"><?php echo esc_html('*'); ?></span>
+                                        &nbsp;&nbsp;
+                                        <a href="<?php echo esc_url('https://pixabay.com/api/docs/'); ?>" 
+                                          target="_blank"
+                                          rel="noopener noreferrer">
+                                            <?php esc_html_e('Get Api key', 'super-fast-blog-ai'); ?>
+                                        </a>
+                                    </p>
+                                  </label>
                                     
-                                    if (!empty($terms) && !is_wp_error($terms)) {
-                                        echo '<ul class="custom-taxonomy-list">';
-                                        foreach ($terms as $term) {
-                                            echo '<li>';
-                                            echo '<label>';
-                                            echo '<input type="checkbox" id="category" name="ot_taxonomy" value="' . esc_attr($term->term_id) . '"> ';
-                                            echo esc_html($term->name);
-                                            echo '</label>';
-                                            echo '</li>';
-                                        }
-                                        echo '</ul>';
-                                    }
-                              ?>
+                                  <div id="otslf_image_generate_api_key">
+                                    <input type="password" name="featured_image_api" id="featured_image_api" placeholder="">                                     
+                                  </div>
+                                   <small class="error-message" id="imgapierror"></small>
+                                </div>               
+                              <div id="otslf_dall3_generate_api_key" class="dalle_image">                      
+                                    Openai API will be used, don't use other Api.                
+                              </div>  
                             </div>
-                            <small class="error-message" id="caterror"></small>
+                          </div>
+                        </div>
+
+                          <button class="accordion image-generation-btn">
+                            <?php esc_html_e('SEO','super-fast-blog-ai')?> 
+                            <span class="slf-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
+                            </span>
+                          </button>
+
+                          <div class="image-generation-wrap panel">
+                            <div class="image-generation-inner">
+                              <div class="blog-post">
+                                <div class="textarea-content">
+                                <label for="textarea"><?php esc_html_e('Five keywords will be generated by the selected title (you can edit & modify those keywords)','super-fast-blog-ai')?></label> 
+                                </div>
+                                <textarea name="seo_keyword" id="seo_keyword" placeholder=""></textarea><br>
+                                <small class="error-message" id="keyword_limit"></small>
+                                <div class="textarea-content meta-description-field">
+                                  <label for="textarea"><?php esc_html_e('Meta Description Generated Limit 160 Characters','super-fast-blog-ai')?> </label>  
+                                </div>
+                                <textarea name="meta_description" id="meta_description" placeholder="Meta Description"></textarea>
+                                <small class="error-message" id="limit_message"></small>
+                                <div class="btn-wrap">
+                                  <button class="seokeyword btn">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><path d="M11.403 6.027a5.32 5.32 0 0 1-4.114-4.114.548.548 0 0 0-1.073 0 5.32 5.32 0 0 1-4.114 4.114.548.548 0 0 0 0 1.072 5.32 5.32 0 0 1 4.114 4.115.548.548 0 0 0 1.072 0 5.32 5.32 0 0 1 4.115-4.115.548.548 0 0 0 0-1.072m-.906 9.049a2.51 2.51 0 0 1-1.938-1.938.548.548 0 0 0-1.072 0 2.51 2.51 0 0 1-1.939 1.938.548.548 0 0 0 0 1.072 2.51 2.51 0 0 1 1.939 1.939.548.548 0 0 0 1.072 0 2.51 2.51 0 0 1 1.938-1.939.548.548 0 0 0 0-1.072m7.401-5.072a3.39 3.39 0 0 1-2.62-2.62.548.548 0 0 0-1.072 0 3.39 3.39 0 0 1-2.62 2.62.548.548 0 0 0 0 1.073 3.39 3.39 0 0 1 2.62 2.62.548.548 0 0 0 1.072 0 3.39 3.39 0 0 1 2.62-2.62.548.548 0 0 0 0-1.073" fill="#7328F2"/></svg>
+                                    <?php esc_html_e('keyword Generate','super-fast-blog-ai')?> 
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                              <!-- end -->    
+                          <!-- Publish to post   -->
+                          <button class="accordion image-generation-btn">
+                            <h5> <?php esc_html_e('Publish to Post','super-fast-blog-ai')?> <span class="redmark">*</span> </h5>                                    
+                            <span class="slf-arrow">
+                              <!-- &#9660; -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.06 8.204a.75.75 0 0 1 1.06-.063l4.297 3.82 4.297-3.82a.75.75 0 1 1 .997 1.121l-4.796 4.263a.75.75 0 0 1-.997 0L5.123 9.262a.75.75 0 0 1-.062-1.058" fill="#757F8E"/></svg>
+                            </span>
+                          </button>
+
+                          <div class="image-generation-wrap panel schedule-wrap">
+                            <div class="image-generation-inner">
+                              <div class="category-inner col2">
+                                <div class="input-container">
+                                  <h6><?php esc_html_e('Category','super-fast-blog-ai')?> </h6> 
+                                </div>
+                                 <span><?php esc_html_e('Select 1 or 2 categories following list','super-fast-blog-ai')?></span>
+                                 <p></p>
+                                <div class="category-checkbox-inner">                                  
+                                  <?php 
+                                        $terms = get_terms(array(
+                                          'taxonomy' => 'category', 
+                                          'hide_empty' => false, 
+                                        ));
+                                        
+                                        if (!empty($terms) && !is_wp_error($terms)) {
+                                            echo '<ul class="custom-taxonomy-list">';
+                                            foreach ($terms as $term) {
+                                                echo '<li>';
+                                                echo '<label>';
+                                                echo '<input type="checkbox" id="category" name="ot_taxonomy" value="' . esc_attr($term->term_id) . '"> ';
+                                                echo esc_html($term->name);
+                                                echo '</label>';
+                                                echo '</li>';
+                                            }
+                                            echo '</ul>';
+                                        }
+                                  ?>
+                                </div>
+                                <small class="error-message" id="caterror"></small>
+                              </div>
+
+                                  <!-- end -->    
+                            </div>
                         </div>
-                    </div>
-                    <!-- Start ending btn  -->
-                    <div class="generate-title-wrap">
-                      <div class="generate-title-prmo">
+                        <!-- Start ending btn  -->
+                        <div class="generate-title-wrap">
+                          <div class="generate-title-prmo">
+                          </div>
+                          <div class="btn-wrapper">
+                            <button disabled class="btn generateBtn disabled" name="generateBtn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><path d="M11.403 6.027a5.32 5.32 0 0 1-4.114-4.114.548.548 0 0 0-1.073 0 5.32 5.32 0 0 1-4.114 4.114.548.548 0 0 0 0 1.072 5.32 5.32 0 0 1 4.114 4.115.548.548 0 0 0 1.072 0 5.32 5.32 0 0 1 4.115-4.115.548.548 0 0 0 0-1.072m-.906 9.049a2.51 2.51 0 0 1-1.938-1.938.548.548 0 0 0-1.072 0 2.51 2.51 0 0 1-1.939 1.938.548.548 0 0 0 0 1.072 2.51 2.51 0 0 1 1.939 1.939.548.548 0 0 0 1.072 0 2.51 2.51 0 0 1 1.938-1.939.548.548 0 0 0 0-1.072m7.401-5.072a3.39 3.39 0 0 1-2.62-2.62.548.548 0 0 0-1.072 0 3.39 3.39 0 0 1-2.62 2.62.548.548 0 0 0 0 1.073 3.39 3.39 0 0 1 2.62 2.62.548.548 0 0 0 1.072 0 3.39 3.39 0 0 1 2.62-2.62.548.548 0 0 0 0-1.073" fill="#fff"/></svg>
+                            <?php esc_html_e('Generate Blog','super-fast-blog-ai')?> 
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div class="btn-wrapper">
-                        <button disabled class="btn generateBtn disabled" name="generateBtn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><path d="M11.403 6.027a5.32 5.32 0 0 1-4.114-4.114.548.548 0 0 0-1.073 0 5.32 5.32 0 0 1-4.114 4.114.548.548 0 0 0 0 1.072 5.32 5.32 0 0 1 4.114 4.115.548.548 0 0 0 1.072 0 5.32 5.32 0 0 1 4.115-4.115.548.548 0 0 0 0-1.072m-.906 9.049a2.51 2.51 0 0 1-1.938-1.938.548.548 0 0 0-1.072 0 2.51 2.51 0 0 1-1.939 1.938.548.548 0 0 0 0 1.072 2.51 2.51 0 0 1 1.939 1.939.548.548 0 0 0 1.072 0 2.51 2.51 0 0 1 1.938-1.939.548.548 0 0 0 0-1.072m7.401-5.072a3.39 3.39 0 0 1-2.62-2.62.548.548 0 0 0-1.072 0 3.39 3.39 0 0 1-2.62 2.62.548.548 0 0 0 0 1.073 3.39 3.39 0 0 1 2.62 2.62.548.548 0 0 0 1.072 0 3.39 3.39 0 0 1 2.62-2.62.548.548 0 0 0 0-1.073" fill="#fff"/></svg>
-                        <?php esc_html_e('Generate Blog','super-fast-blog-ai')?> 
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                   <!-- Image Generation  -->
                 </div>
               <?php 
@@ -781,6 +781,8 @@ class Class_Articlegenerate {
                   }
                 return false;  // Return false if no image is found for any search term
             }
+
+            
   
 
               /*================================
