@@ -109,40 +109,29 @@ $modules = [
 
 $stats = [
 	[
-		'label'    => __( 'Total Generations', 'super-fast-blog-ai' ),
-		'value'    => number_format( (int) ( $summary['total_generations'] ?? 0 ) ),
-		'sub'      => __( 'AI-powered articles created', 'super-fast-blog-ai' ),
-		'icon'     => '🤖',
-		'accent'   => '#2563eb',
-		'icon_bg'  => '#dbeafe',
-		'val_color'=> '#1e40af',
+		'label'   => __( 'Generations this month', 'super-fast-blog-ai' ),
+		'value'   => number_format( (int) ( $summary['total_generations'] ?? 0 ) ),
+		'icon'    => '✨',
+		'icon_bg' => '#fff7ed',
 	],
 	[
-		'label'    => __( 'Cost This Month', 'super-fast-blog-ai' ),
-		'value'    => '$' . number_format( (float) ( $summary['this_month_cost'] ?? 0 ), 4 ),
-		'sub'      => __( 'Current month API spend', 'super-fast-blog-ai' ),
-		'icon'     => '💵',
-		'accent'   => '#16a34a',
-		'icon_bg'  => '#dcfce7',
-		'val_color'=> '#15803d',
+		'label'   => __( 'API cost this month', 'super-fast-blog-ai' ),
+		'value'   => '$' . number_format( (float) ( $summary['this_month_cost'] ?? 0 ), 2 ),
+		'icon'    => '💰',
+		'icon_bg' => '#fff7ed',
 	],
 	[
-		'label'    => __( 'Providers Connected', 'super-fast-blog-ai' ),
-		'value'    => $connected . '<span style="font-size:15px;font-weight:500;color:#a5b4fc;">&thinsp;/&thinsp;7</span>',
-		'sub'      => __( 'AI providers active', 'super-fast-blog-ai' ),
-		'icon'     => '🔌',
-		'accent'   => '#7c3aed',
-		'icon_bg'  => '#ede9fe',
-		'val_color'=> '#6d28d9',
+		'label'   => __( 'Providers connected', 'super-fast-blog-ai' ),
+		'value'   => $connected . '<span style="font-size:16px;font-weight:500;color:#9ca3af;">/7</span>',
+		'icon'    => '🔌',
+		'icon_bg' => '#f0fdf4',
 	],
 	[
-		'label'    => __( 'Brand Voice', 'super-fast-blog-ai' ),
-		'value'    => $voice_status ? '✓ ' . __( 'Active', 'super-fast-blog-ai' ) : __( 'Not Set', 'super-fast-blog-ai' ),
-		'sub'      => $voice_status ? __( 'Applied to every generation', 'super-fast-blog-ai' ) : __( 'Configure brand voice', 'super-fast-blog-ai' ),
-		'icon'     => '🎨',
-		'accent'   => $voice_status ? '#0891b2' : '#d97706',
-		'icon_bg'  => $voice_status ? '#cffafe' : '#fef3c7',
-		'val_color'=> $voice_status ? '#0e7490' : '#b45309',
+		'label'   => __( 'Brand Voice', 'super-fast-blog-ai' ),
+		'value'   => $voice_status ? __( 'Active', 'super-fast-blog-ai' ) : __( 'Setup', 'super-fast-blog-ai' ),
+		'icon'    => '🎨',
+		'icon_bg' => '#fdf4ff',
+		'muted'   => ! $voice_status,
 	],
 ];
 ?>
@@ -174,26 +163,25 @@ $stats = [
 	<?php endif; ?>
 
 	<!-- ── Stats Grid ───────────────────────────────────────────── -->
-	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;">
-		<?php foreach ( $stats as $st ) : ?>
-		<div style="position:relative;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 18px 16px;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;">
+	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+		<?php foreach ( $stats as $st ) :
+			$muted = $st['muted'] ?? false;
+		?>
+		<div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
 
-			<!-- Accent bar -->
-			<div style="position:absolute;top:0;left:0;right:0;height:3px;background:<?php echo esc_attr( $st['accent'] ); ?>;border-radius:12px 12px 0 0;"></div>
-
-			<!-- Top row: icon tile + label -->
-			<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-				<div style="width:36px;height:36px;flex-shrink:0;background:<?php echo esc_attr( $st['icon_bg'] ); ?>;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;">
-					<?php echo $st['icon']; ?>
-				</div>
-				<span style="font-size:11.5px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;line-height:1.2;">
-					<?php echo esc_html( $st['label'] ); ?>
-				</span>
+			<!-- Icon tile -->
+			<div style="width:48px;height:48px;flex-shrink:0;background:<?php echo esc_attr( $st['icon_bg'] ); ?>;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">
+				<?php echo $st['icon']; ?>
 			</div>
 
-			<!-- Metric value -->
-			<div style="font-size:26px;font-weight:800;color:<?php echo esc_attr( $st['val_color'] ); ?>;letter-spacing:-.5px;line-height:1;">
-				<?php echo $st['value']; ?>
+			<!-- Text -->
+			<div>
+				<div style="font-size:22px;font-weight:700;line-height:1.15;color:<?php echo $muted ? '#9ca3af' : '#f97316'; ?>;">
+					<?php echo $st['value']; ?>
+				</div>
+				<div style="font-size:12px;color:#9ca3af;margin-top:3px;">
+					<?php echo esc_html( $st['label'] ); ?>
+				</div>
 			</div>
 
 		</div>
