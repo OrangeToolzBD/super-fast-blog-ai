@@ -1,0 +1,50 @@
+# ── OS & Editor ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ── Claude / AI session files ────────────────────────────────────────────────
+.claude/
+
+# ── PHP / Composer ───────────────────────────────────────────────────────────
+/vendor/
+composer.lock
+
+# ── Node / NPM ───────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log
+package-lock.json
+
+# ── WordPress specific ───────────────────────────────────────────────────────
+*.log
+wp-content/uploads/
+wp-content/cache/
+
+# ── Build / dist artifacts ───────────────────────────────────────────────────
+/dist/
+/build/
+*.zip
+*.tar.gz
+
+# ── Dev / planning docs ──────────────────────────────────────────────────────
+DEVELOP_PLAN.md
+MERGE_RULES.md
+
+# ── Environment & secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Test & coverage ──────────────────────────────────────────────────────────
+/coverage/
+.phpunit.result.cache
+phpunit.xml
