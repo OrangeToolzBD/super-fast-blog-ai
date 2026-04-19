@@ -102,48 +102,56 @@ $budget_color = $status_colors[ $budget['status'] ?? 'ok' ] ?? 'green';
 	<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
 		<div class="sfba-card">
 			<h3><?php esc_html_e( 'By Provider', 'super-fast-blog-ai' ); ?></h3>
-			<table class="sfba-cost-table">
-				<thead><tr>
-					<th><?php esc_html_e( 'Provider', 'super-fast-blog-ai' ); ?></th>
-					<th><?php esc_html_e( 'Calls', 'super-fast-blog-ai' ); ?></th>
-					<th><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
-				</tr></thead>
-				<tbody>
-				<?php foreach ( $summary['by_provider'] ?? [] as $row ) : ?>
-				<tr>
-					<td><?php echo esc_html( ucfirst( $row['provider'] ) ); ?></td>
-					<td><?php echo esc_html( number_format( (int) $row['count'] ) ); ?></td>
-					<td>$<?php echo esc_html( number_format( (float) $row['cost'], 4 ) ); ?></td>
-				</tr>
-				<?php endforeach; ?>
-				<?php if ( empty( $summary['by_provider'] ?? [] ) ) : ?>
-				<tr><td colspan="3" class="sfba-table-loading"><?php esc_html_e( 'No data yet.', 'super-fast-blog-ai' ); ?></td></tr>
-				<?php endif; ?>
-				</tbody>
-			</table>
+			<div style="max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
+				<table class="sfba-cost-table" style="margin:0;border:none;border-radius:0;">
+					<thead>
+						<tr>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Provider', 'super-fast-blog-ai' ); ?></th>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Calls', 'super-fast-blog-ai' ); ?></th>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php foreach ( $summary['by_provider'] ?? [] as $row ) : ?>
+					<tr>
+						<td><?php echo esc_html( ucfirst( $row['provider'] ) ); ?></td>
+						<td><?php echo esc_html( number_format( (int) $row['count'] ) ); ?></td>
+						<td>$<?php echo esc_html( number_format( (float) $row['cost'], 4 ) ); ?></td>
+					</tr>
+					<?php endforeach; ?>
+					<?php if ( empty( $summary['by_provider'] ?? [] ) ) : ?>
+					<tr><td colspan="3" class="sfba-table-loading"><?php esc_html_e( 'No data yet.', 'super-fast-blog-ai' ); ?></td></tr>
+					<?php endif; ?>
+					</tbody>
+				</table>
+			</div>
 		</div>
 
 		<div class="sfba-card">
 			<h3><?php esc_html_e( 'By Feature', 'super-fast-blog-ai' ); ?></h3>
-			<table class="sfba-cost-table">
-				<thead><tr>
-					<th><?php esc_html_e( 'Feature', 'super-fast-blog-ai' ); ?></th>
-					<th><?php esc_html_e( 'Calls', 'super-fast-blog-ai' ); ?></th>
-					<th><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
-				</tr></thead>
-				<tbody>
-				<?php foreach ( $summary['by_feature'] ?? [] as $row ) : ?>
-				<tr>
-					<td><?php echo esc_html( str_replace( '_', ' ', ucwords( $row['feature'], '_' ) ) ); ?></td>
-					<td><?php echo esc_html( number_format( (int) $row['count'] ) ); ?></td>
-					<td>$<?php echo esc_html( number_format( (float) $row['cost'], 4 ) ); ?></td>
-				</tr>
-				<?php endforeach; ?>
-				<?php if ( empty( $summary['by_feature'] ?? [] ) ) : ?>
-				<tr><td colspan="3" class="sfba-table-loading"><?php esc_html_e( 'No data yet.', 'super-fast-blog-ai' ); ?></td></tr>
-				<?php endif; ?>
-				</tbody>
-			</table>
+			<div style="max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
+				<table class="sfba-cost-table" style="margin:0;border:none;border-radius:0;">
+					<thead>
+						<tr>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Feature', 'super-fast-blog-ai' ); ?></th>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Calls', 'super-fast-blog-ai' ); ?></th>
+							<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php foreach ( $summary['by_feature'] ?? [] as $row ) : ?>
+					<tr>
+						<td><?php echo esc_html( str_replace( '_', ' ', ucwords( $row['feature'], '_' ) ) ); ?></td>
+						<td><?php echo esc_html( number_format( (int) $row['count'] ) ); ?></td>
+						<td>$<?php echo esc_html( number_format( (float) $row['cost'], 4 ) ); ?></td>
+					</tr>
+					<?php endforeach; ?>
+					<?php if ( empty( $summary['by_feature'] ?? [] ) ) : ?>
+					<tr><td colspan="3" class="sfba-table-loading"><?php esc_html_e( 'No data yet.', 'super-fast-blog-ai' ); ?></td></tr>
+					<?php endif; ?>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
@@ -161,19 +169,23 @@ $budget_color = $status_colors[ $budget['status'] ?? 'ok' ] ?? 'green';
 				</button>
 			</div>
 		</div>
-		<table class="sfba-cost-table" id="sfba-cost-log-table">
-			<thead><tr>
-				<th><?php esc_html_e( 'Time', 'super-fast-blog-ai' ); ?></th>
-				<th><?php esc_html_e( 'Provider', 'super-fast-blog-ai' ); ?></th>
-				<th><?php esc_html_e( 'Model', 'super-fast-blog-ai' ); ?></th>
-				<th><?php esc_html_e( 'Feature', 'super-fast-blog-ai' ); ?></th>
-				<th><?php esc_html_e( 'Tokens', 'super-fast-blog-ai' ); ?></th>
-				<th><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
-			</tr></thead>
-			<tbody id="sfba-cost-log-body">
-				<tr><td colspan="6" class="sfba-table-loading"><?php esc_html_e( 'Loading…', 'super-fast-blog-ai' ); ?></td></tr>
-			</tbody>
-		</table>
+		<div style="max-height:400px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
+			<table class="sfba-cost-table" id="sfba-cost-log-table" style="margin:0;border:none;border-radius:0;">
+				<thead>
+					<tr>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Time', 'super-fast-blog-ai' ); ?></th>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Provider', 'super-fast-blog-ai' ); ?></th>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Model', 'super-fast-blog-ai' ); ?></th>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Feature', 'super-fast-blog-ai' ); ?></th>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Tokens', 'super-fast-blog-ai' ); ?></th>
+						<th style="position:sticky;top:0;background:#f9fafb;z-index:1;"><?php esc_html_e( 'Cost', 'super-fast-blog-ai' ); ?></th>
+					</tr>
+				</thead>
+				<tbody id="sfba-cost-log-body">
+					<tr><td colspan="6" class="sfba-table-loading"><?php esc_html_e( 'Loading…', 'super-fast-blog-ai' ); ?></td></tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 
 </div>
@@ -216,8 +228,8 @@ $budget_color = $status_colors[ $budget['status'] ?? 'ok' ] ?? 'green';
 				<td>${ escHtml( r.provider || '' ) }</td>
 				<td><code style="font-size:11px;">${ escHtml( r.model || '' ) }</code></td>
 				<td>${ escHtml( ( r.feature || '' ).replace( /_/g, ' ' ) ) }</td>
-				<td style="text-align:right;">${ parseInt( r.prompt_tokens || 0 ) + parseInt( r.completion_tokens || 0 ) }</td>
-				<td style="text-align:right;">$${ parseFloat( r.cost_usd || 0 ).toFixed( 6 ) }</td>
+				<td>${ parseInt( r.prompt_tokens || 0 ) + parseInt( r.completion_tokens || 0 ) }</td>
+				<td>$${ parseFloat( r.cost_usd || 0 ).toFixed( 6 ) }</td>
 			</tr>` ).join( '' );
 		} ).catch( () => {
 			tbody.innerHTML = '<tr><td colspan="6" class="sfba-table-loading">Failed to load log.</td></tr>';
