@@ -136,6 +136,15 @@ class SFBA_Settings {
 	/**
 	 * Inject CSS to display the SVG logo in the sidebar menu entry.
 	 */
+	/**
+	 * Prevent WordPress from dimming the custom SVG menu icon.
+	 * WP applies opacity:0.6 to all <img> icons by default.
+	 */
+	/**
+	 * Inject the menu icon as a CSS background-image.
+	 * Using background-image avoids the <img> element that WordPress
+	 * filters to white via filter:brightness(0)invert(1).
+	 */
 	public function inject_menu_icon_css(): void {
 		$icon_url = esc_url( SFBA_PLUGIN_URL . 'assets/images/menu_icon.svg' );
 		?>
@@ -144,10 +153,14 @@ class SFBA_Settings {
 			background-image: url('<?php echo $icon_url; ?>') !important;
 			background-repeat: no-repeat !important;
 			background-position: center center !important;
-			background-size: 20px 20px !important;
+			background-size: 28px 28px !important;
 		}
 		#adminmenu #toplevel_page_super-fast-blog-ai .wp-menu-image::before {
 			content: '' !important;
+			display: none !important;
+		}
+		#adminmenu #toplevel_page_super-fast-blog-ai .wp-menu-image img {
+			display: none !important;
 		}
 		</style>
 		<?php
@@ -163,8 +176,8 @@ class SFBA_Settings {
 			'manage_options',
 			'super-fast-blog-ai',
 			[ $this, 'render_dashboard_page' ],
-			SFBA_PLUGIN_URL . 'assets/images/menu_icon.svg',
-			30
+			'none',
+			81
 		);
 
 		// First submenu replaces the auto-generated duplicate of the top-level entry.
