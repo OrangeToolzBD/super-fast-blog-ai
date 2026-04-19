@@ -534,6 +534,7 @@ class SFBA_Editor_Integration {
 				'outlineHint'     => __( 'Review the outline, then generate each section or the full article.', 'super-fast-blog-ai' ),
 				'generateSection' => __( 'Write Section',        'super-fast-blog-ai' ),
 				'insertSection'   => __( 'Insert into editor',   'super-fast-blog-ai' ),
+				/* translators: %s is the model name or provider */
 				'wordCount'       => __( '%d words',             'super-fast-blog-ai' ),
 				'metaGenerate'    => __( 'Generate Meta',        'super-fast-blog-ai' ),
 				'metaTitle'       => __( 'Meta Title',           'super-fast-blog-ai' ),

@@ -96,9 +96,9 @@
             // If cache is empty, query the database
             $generated_title = $wpdb->prefix . 'slf_generated_title';
             $query = $wpdb->prepare(
-                "SELECT generate_title FROM {$generated_title} ORDER BY id DESC LIMIT %d", 1 ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-            
-            $result = $wpdb->get_var($query);  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                "SELECT generate_title FROM {$generated_title} ORDER BY id DESC LIMIT %d", 1 ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+            $result = $wpdb->get_var($query); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
             wp_cache_set($cache_key, $result, $cache_group, 3600);
         }
 

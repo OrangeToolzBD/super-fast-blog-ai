@@ -1,4 +1,5 @@
-<?php 
+<?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  *
  *  orange setting managment
@@ -58,7 +59,7 @@ class Class_Setting_Management {
        </div>
         
         <?php 
-            if (isset($_GET['settings-updated'])) {
+            if (isset($_GET['settings-updated'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 echo '<div id="setting-success-message" style="display:none;">' . esc_html__('Congratulations! Settings saved successfully.', 'super-fast-blog-ai') . '</div>';
             }
         ?>

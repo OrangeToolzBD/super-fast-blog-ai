@@ -320,7 +320,7 @@ class SFBA_Performance {
 
 		$weeks = max( 1, min( self::HISTORY_WEEKS, $weeks ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT week_start, impressions, clicks, avg_position, ctr, source
@@ -333,6 +333,7 @@ class SFBA_Performance {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$total_impressions = 0;
 		$total_clicks      = 0;
@@ -392,7 +393,7 @@ class SFBA_Performance {
 
 		$ids_placeholder = implode( ',', array_map( 'intval', $ai_post_ids ) );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$ai = $wpdb->get_row(
 			"SELECT
 				COUNT(DISTINCT post_id)                         AS post_count,
@@ -447,7 +448,7 @@ class SFBA_Performance {
 		if ( ! empty( $ai_post_ids ) ) {
 			$ids_ph = implode( ',', array_map( 'intval', $ai_post_ids ) );
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$top_rows = $wpdb->get_results(
 				"SELECT post_id, SUM(impressions) AS impressions, SUM(clicks) AS clicks,
 				        MIN(avg_position) AS best_position
@@ -458,6 +459,7 @@ class SFBA_Performance {
 				  LIMIT 5",
 				ARRAY_A
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			foreach ( $top_rows as $row ) {
 				$pid = (int) $row['post_id'];
@@ -472,7 +474,7 @@ class SFBA_Performance {
 			}
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$month = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT COALESCE(SUM(impressions), 0) AS impressions,
@@ -484,6 +486,7 @@ class SFBA_Performance {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$comparison   = $this->get_comparison();
 		$headline     = '';
@@ -508,10 +511,11 @@ class SFBA_Performance {
 		$tracked_ai_ids = [];
 		if ( ! empty( $ai_post_ids ) ) {
 			$ids_ph = implode( ',', array_map( 'intval', $ai_post_ids ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$tracked_ai_ids = $wpdb->get_col(
 				"SELECT DISTINCT post_id FROM {$wpdb->prefix}sfba_performance WHERE post_id IN ($ids_ph)"
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 		$untracked = count( $ai_post_ids ) - count( $tracked_ai_ids );
 
@@ -543,7 +547,7 @@ class SFBA_Performance {
 			'orderby'        => 'date',
 			'order'          => 'DESC',
 			'fields'         => 'ids',
-			'post__not_in'   => $ai_post_ids ?: [ 0 ],
+			'post__not_in'   => $ai_post_ids ?: [ 0 ], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 		] );
 
 		$all_ids = array_merge( $ai_post_ids, $manual_ids );
@@ -678,7 +682,7 @@ class SFBA_Performance {
 	private function upsert_snapshot( int $post_id, string $week_start, array $metrics ): bool {
 		global $wpdb;
 
-		$result = $wpdb->query(
+		$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"REPLACE INTO {$wpdb->prefix}sfba_performance
 				 (post_id, week_start, impressions, clicks, avg_position, ctr, source)
@@ -704,10 +708,11 @@ class SFBA_Performance {
 	private function get_ai_post_ids(): array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$ids = $wpdb->get_col(
 			"SELECT DISTINCT post_id FROM {$wpdb->prefix}sfba_generations WHERE post_id > 0 LIMIT 5000"
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return array_map( 'intval', $ids );
 	}
@@ -721,7 +726,7 @@ class SFBA_Performance {
 	private function is_ai_generated( int $post_id ): bool {
 		global $wpdb;
 
-		return (bool) $wpdb->get_var(
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT 1 FROM {$wpdb->prefix}sfba_generations WHERE post_id = %d LIMIT 1",
 				$post_id

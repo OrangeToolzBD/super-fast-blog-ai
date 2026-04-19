@@ -12,6 +12,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $ai     = $comparison['ai']     ?? [];
 $manual = $comparison['manual'] ?? [];

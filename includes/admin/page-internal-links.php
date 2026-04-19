@@ -15,6 +15,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $coverage_pct = $published_count > 0 ? min( 100, round( ( $index_count / $published_count ) * 100 ) ) : 0;
 ?>

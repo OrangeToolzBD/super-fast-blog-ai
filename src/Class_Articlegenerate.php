@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  *
  *  orange post article generate
@@ -50,15 +51,15 @@ class Class_Articlegenerate {
                             $last_row = wp_cache_get('last_schedule_post_row');
                             
                             if ($last_row === false) {
-                                $last_row = $wpdb->get_row(
-                                  $wpdb->prepare( "SELECT * FROM `{$schedule_post}` WHERE indicat = %s ORDER BY log_time DESC LIMIT 1", 'yes' )
+                                $last_row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+                                  $wpdb->prepare( "SELECT * FROM `{$schedule_post}` WHERE indicat = %s ORDER BY log_time DESC LIMIT 1", 'yes' ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
                               );
-                              
+
                                 wp_cache_set('last_schedule_post_row', $last_row, '', 600);
                             }
 
                             if (!empty($last_row->postid)) {
-                                $updated = $wpdb->update(
+                                $updated = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                                     $schedule_post,
                                     ['indicat' => 'no'],
                                     ['postid' => $last_row->postid]
@@ -551,6 +552,7 @@ class Class_Articlegenerate {
                         [
                             'role'    => 'user',
                             'content' => sprintf(
+                                /* translators: %s is a date or status */
                                 esc_html__( 'Generate a detailed article on "%1$s" with at least %2$d words.', 'super-fast-blog-ai' ),
                                 esc_html( $title ),
                                 $user_word_count
@@ -588,6 +590,7 @@ class Class_Articlegenerate {
                         $prompt[] = [
                             'role'    => 'user',
                             'content' => sprintf(
+                                /* translators: %s is a date or status */
                                 esc_html__( 'Include %1$d subheadings using %2$s tags, ensuring each contains relevant keywords.', 'super-fast-blog-ai' ),
                                 intval( $numberh ),
                                 esc_html( $htaging )

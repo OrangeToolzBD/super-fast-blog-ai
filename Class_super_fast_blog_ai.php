@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Super Fast Blog AI – SEO-Optimized AI Content Generator & Writer for WordPress (20x Faster)
+ * Plugin Name: Super Fast Blog AI – AI Content Generator, Repurposer & SEO Writer
  * Plugin URI:  https://waatechdigital.com/super-fast-ai-blog-revolutionizing-content-creation-in-wordpress/
  * Description: AI-powered blog content generator with 7 provider support, brand voice learning, content calendar, internal linking, cost tracking, and advanced model routing. Bring Your Own Key — no subscriptions.
  * Version:     2.0.0
  * Requires at least: 6.3
  * Requires PHP: 8.1
- * Tested up to: 6.8.1
+ * Tested up to: 6.9
  * Author:      waatechdigital
  * Author URI:  https://waatechdigital.com
  * License:     GPL2 or later
@@ -101,9 +101,9 @@ spl_autoload_register( function ( string $class_name ): void {
 // Kept during transition while old src/ classes are still used.
 // ─────────────────────────────────────────────────────────────────────────────
 
-$legacy_autoload = SFBA_PLUGIN_DIR . 'vendor/autoload.php';
-if ( file_exists( $legacy_autoload ) ) {
-	require_once $legacy_autoload;
+$sfba_legacy_autoload = SFBA_PLUGIN_DIR . 'vendor/autoload.php';
+if ( file_exists( $sfba_legacy_autoload ) ) {
+	require_once $sfba_legacy_autoload;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

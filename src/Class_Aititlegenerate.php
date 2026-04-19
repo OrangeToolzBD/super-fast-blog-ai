@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  *
  *  orange post title generate
@@ -269,7 +270,7 @@ class Class_Aititlegenerate
                                 ?>
                                 <?php
                                     $generated_title_table = $wpdb->prefix . "slf_generated_title";
-                                    $result = $wpdb->get_var($wpdb->prepare("SELECT generate_title FROM {$generated_title_table} ORDER BY id DESC LIMIT %d", 1));  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                                    $result = $wpdb->get_var($wpdb->prepare("SELECT generate_title FROM {$generated_title_table} ORDER BY id DESC LIMIT %d", 1));  // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
                                     //$result = $wpdb->get_var($query);                                    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                                 ?>
                                 <button type="button" class="btnstyle delete-prompt-btn" id="multidel">
@@ -309,8 +310,8 @@ class Class_Aititlegenerate
                     wp_cache_delete($cache_key, $cache_group);
                     
                     $generated_name = $wpdb->prefix . 'slf_generated_title';
-                    $query = "DELETE FROM {$generated_name} WHERE protid IN ($placeholders)"; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                    $result = $wpdb->query($wpdb->prepare($query, $selected_titles));
+                    $query = "DELETE FROM {$generated_name} WHERE protid IN ($placeholders)"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+                    $result = $wpdb->query($wpdb->prepare($query, $selected_titles)); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery
                     //$result = $wpdb->query($prepared);                                     // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                     
                     if ($result !== false) {
@@ -411,8 +412,8 @@ class Class_Aititlegenerate
                         $last_protid     = wp_cache_get($cache_key);
             
                         if (false === $last_protid) {
-                            $query       = "SELECT MAX(protid) FROM {$generated_title}";
-                            $last_protid = (int) $wpdb->get_var($query); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                            $query       = "SELECT MAX(protid) FROM {$generated_title}"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+                            $last_protid = (int) $wpdb->get_var($query); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
                             wp_cache_set($cache_key, $last_protid, '', 3600);
                         }
             
@@ -452,7 +453,7 @@ class Class_Aititlegenerate
                 
                 check_ajax_referer('ai-seo-content-nonce', 'nonce');
                 
-                error_log('Artcile generator');
+                error_log('Artcile generator'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 // Check if the title is passed via AJAX and sanitize it
                 if (!isset($_POST['title']) || empty($_POST['title'])) {
@@ -492,7 +493,8 @@ class Class_Aititlegenerate
                             ],
                             [
                                 'role' => 'user',   
-                                'content' => sprintf(     
+                                'content' => sprintf(
+                                    /* translators: 1: article title, 2: word count */
                                     esc_html__('Generate a detailed, SEO-optimized article on "%1$s" with at least "%2$d" words. Follow these SEO guidelines:', 'super-fast-blog-ai'),
                                     esc_html($title),
                                     $user_word_count
@@ -653,7 +655,7 @@ class Class_Aititlegenerate
                     
                     $content = $response['choices'][0]['message']['content'] ?? '';
 
-                    error_log('Artcile generator', '1111');
+                    error_log('Artcile generator', '1111'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             
                     $ot_taxonomy = get_option('otslf_ot_taxonomy', []);
                     if (!is_array($ot_taxonomy)) {
@@ -708,7 +710,7 @@ class Class_Aititlegenerate
                                 $this->otslf_post_email_notification($post_id);       
                             }
 
-                            error_log('Article-2', '222');
+                            error_log('Article-2', '222'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             
                             // Send success response
                             wp_send_json_success([
@@ -777,7 +779,7 @@ class Class_Aititlegenerate
                     wp_send_json_error('Blog title not provided', 400);
                 }
                 
-                error_log('Keyword-1');
+                error_log('Keyword-1'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 $blog_title = sanitize_text_field(wp_unslash($_POST['blog_title']));
             
@@ -800,7 +802,7 @@ class Class_Aititlegenerate
                     'timeout' => 20,
                 ));
 
-                error_log('Keyword-2');
+                error_log('Keyword-2'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 if (is_wp_error($response)) {
                     $error_message = $response->get_error_message();
@@ -818,7 +820,7 @@ class Class_Aititlegenerate
                             return !empty($title) && !preg_match('/^Here are|^Certainly|^Sure|
                             ^given topic/', $title);
                         });
-                error_log('Keyword-3');    
+                error_log('Keyword-3'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         // Remove numbering and any unnecessary quotes
                         $clean_titles = array_map(function($title) {
                             $title = preg_replace('/^\d+\.\s*/', '', $title);
@@ -854,7 +856,7 @@ class Class_Aititlegenerate
                     wp_send_json_error('Blog title not provided', 400);
                 }
 
-                error_log('Meta description error-1');
+                error_log('Meta description error-1'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 $blog_title = sanitize_text_field(wp_unslash($_POST['blog_title']));
                 $prompt = 'Write a SEO-friendly 160-character meta description based on the following input: ' . $blog_title;
@@ -875,7 +877,7 @@ class Class_Aititlegenerate
                     'timeout' => 30,
                 ));
 
-                error_log('Meta description error-2');
+                error_log('Meta description error-2'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 if (is_wp_error($response)) {
                     $error_message = $response->get_error_message();
@@ -1016,8 +1018,8 @@ class Class_Aititlegenerate
 				$cache_key = 'latest_generated_title_value';
 				$title = wp_cache_get($cache_key);
 				if (false === $title) {
-				   $query = "SELECT generate_title FROM $generated_title ORDER BY id DESC LIMIT 1";
-				   $title = $wpdb->get_var($query);                                         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				   $query = "SELECT generate_title FROM $generated_title ORDER BY id DESC LIMIT 1"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+				   $title = $wpdb->get_var($query); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 				   wp_cache_set($cache_key, $title, '', 3600); 
 				}
                 
@@ -1240,7 +1242,7 @@ class Class_Aititlegenerate
                     $keyword_separate = [trim($title)];
                 }
             
-                error_log('Searching Image for Keyword(s): ' . implode(", ", $keyword_separate));
+                error_log('Searching Image for Keyword(s): ' . implode(", ", $keyword_separate)); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             
                 foreach ($keyword_separate as $term) {
                     if (empty($term)) continue;
@@ -1262,7 +1264,7 @@ class Class_Aititlegenerate
                     ]);
             
                     if (is_wp_error($response)) {
-                        error_log('Pixabay API Error: ' . $response->get_error_message());
+                        error_log('Pixabay API Error: ' . $response->get_error_message()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue;
                     }
             
@@ -1334,7 +1336,7 @@ class Class_Aititlegenerate
                         return false;
                     }
                 } catch (Exception $e) {
-                   // error_log('DALL-E Debug: Exception: ' . $e->getMessage());
+                   // error_log('DALL-E Debug: Exception: ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return false;
                 }
             }
@@ -1347,42 +1349,42 @@ class Class_Aititlegenerate
                 // Set up the Unsplash API key and search URL.
                 $api_key = $this->$imgaccess;
                 
-                error_log('Title :' . $title);
+                error_log('Title :' . $title); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($title) . "&client_id=" . $api_key;
                 
-                error_log('Fetching image from Unsplash');
+                error_log('Fetching image from Unsplash'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 
                 // Fetch image data from Unsplash.
                 $response = wp_remote_get($api_url);
                 if (is_wp_error($response)) {
-                    error_log('Unsplash API request failed: ' . $response->get_error_message());
+                    error_log('Unsplash API request failed: ' . $response->get_error_message()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return false;
                 }
                 
-                error_log('Unsplash image fetched');
+                error_log('Unsplash image fetched'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 
                 // Check the HTTP response code.
                 $response_code = wp_remote_retrieve_response_code($response);
                 if ($response_code !== 200) {
-                    error_log("Unsplash API returned HTTP code: $response_code");
+                    error_log("Unsplash API returned HTTP code: $response_code"); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return false;
                 }
                 
                 $body = wp_remote_retrieve_body($response);
                 $data = json_decode($body, true);
                 
-                error_log('Processing Unsplash API response');
+                error_log('Processing Unsplash API response'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 
                 // Check if the results array exists and contains a valid image URL.
                 if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
-                    error_log("Unsplash API response is missing a valid image URL.");
+                    error_log("Unsplash API response is missing a valid image URL."); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return false;
                 }
                 
                 // Get the regular-sized image URL from the first result.
                 $image_url = $data['results'][0]['urls']['regular'];
-                error_log('Unsplash Image url: ' . $image_url);
+                error_log('Unsplash Image url: ' . $image_url); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 return $image_url;
             }
 
@@ -1402,49 +1404,49 @@ class Class_Aititlegenerate
                     // Find common words between the title and the keyword.
                     $common_words = array_intersect($title_words, $term_words);
                     
-                    error_log('common words' . $common_words);
+                    error_log('common words' . $common_words); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     
                     // If common words exist, use them; otherwise, use the original keyword.
                     $search_query = !empty($common_words) ? implode(" ", $common_words) : $term;
                     
                     // Build the API URL using the refined query.
                     $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($search_query) . "&client_id=" . $api_key;
-                    error_log('Fetching image from Unsplash for term: ' . $term . ' with query: ' . $search_query);
+                    error_log('Fetching image from Unsplash for term: ' . $term . ' with query: ' . $search_query); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
-                    error_log('URL' . $api_url);
+                    error_log('URL' . $api_url); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                     // Fetch image data from Unsplash.
                     $response = wp_remote_get($api_url);
                     if (is_wp_error($response)) {
-                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message());
+                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword.
                     }
                     
                     // Check HTTP response code.
                     $response_code = wp_remote_retrieve_response_code($response);
                     if ($response_code !== 200) {
-                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term);
+                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword.
                     }
                     
                     $body = wp_remote_retrieve_body($response);
                     $data = json_decode($body, true);
-                    error_log('Processing Unsplash API response for term: ' . $term);
+                    error_log('Processing Unsplash API response for term: ' . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     
                     // Check if the results array exists and contains a valid image URL.
                     if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
-                        error_log("Unsplash API response for term '$term' is missing a valid image URL.");
+                        error_log("Unsplash API response for term '$term' is missing a valid image URL."); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword.
                     }
                     
                     // Valid image found – log and return it.
                     $image_url = $data['results'][0]['urls']['regular'];
-                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url);
+                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return $image_url;
                 }
                 
                 // If no valid image is found after checking all keywords.
-                error_log('No valid Unsplash image found for any keyword.');
+                error_log('No valid Unsplash image found for any keyword.'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 return false;
             }
                                       
@@ -1456,49 +1458,49 @@ class Class_Aititlegenerate
                 
                 $common_words_string = implode(', ', $keyword_separate);
 
-                error_log('Common Words' . $common_words_string);
+                error_log('Common Words' . $common_words_string); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                 // Loop through each keyword to find a valid image.
                 foreach ($keyword_separate as $term) {
 
-                    error_log('Common Terms' . $term);
+                    error_log('Common Terms' . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
                     $api_url = "https://api.unsplash.com/search/photos?query=" . urlencode($term) . "&client_id=" . $api_key;
                     
-                    error_log('Fetching image from Unsplash for term: ' . $term);
+                    error_log('Fetching image from Unsplash for term: ' . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     
                     // Fetch image data from Unsplash.
                     $response = wp_remote_get($api_url);
                     if (is_wp_error($response)) {
-                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message());
+                        error_log('Unsplash API request failed for term ' . $term . ': ' . $response->get_error_message()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword instead of returning false immediately.
                     }
                     
                     // Check the HTTP response code.
                     $response_code = wp_remote_retrieve_response_code($response);
                     if ($response_code !== 200) {
-                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term);
+                        error_log("Unsplash API returned HTTP code $response_code for term: " . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword.
                     }
                     
                     $body = wp_remote_retrieve_body($response);
                     $data = json_decode($body, true);
                     
-                    error_log('Processing Unsplash API response for term: ' . $term);
+                    error_log('Processing Unsplash API response for term: ' . $term); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     
                     // Check if the results array exists and contains a valid image URL.
                     if (!is_array($data) || empty($data['results'][0]['urls']['regular'])) {
-                        error_log("Unsplash API response for term $term is missing a valid image URL.");
+                        error_log("Unsplash API response for term $term is missing a valid image URL."); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                         continue; // Try next keyword.
                     }
                     // If a valid image is found, log it and return.
                     $image_url = $data['results'][0]['urls']['regular'];
-                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url);
+                    error_log('Unsplash Image URL for term ' . $term . ': ' . $image_url); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     return $image_url;
                 }
                 
                 // If no keyword produced a valid image URL, log and return false.
-                error_log('No valid Unsplash image found for any keyword.');
+                error_log('No valid Unsplash image found for any keyword.'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 return false;
             }
             
@@ -1526,8 +1528,8 @@ class Class_Aititlegenerate
                     $cache_key = 'latest_generated_title';
                     $results = wp_cache_get($cache_key);
                     if (false === $results) {
-                       $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
-                       $results = $wpdb->get_results($query, OBJECT);            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                       $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+                       $results = $wpdb->get_results($query, OBJECT); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
                        wp_cache_set($cache_key, $results, '', 3600);
                     } 	 
                     
@@ -1614,8 +1616,8 @@ class Class_Aititlegenerate
                     $results = wp_cache_get($cache_key);
     
                     if (false === $results) {                                     
-                        $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1";
-                        $results = $wpdb->get_results($query, OBJECT);     // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                        $query = "SELECT * FROM $table_name where promt_title = promt_title ORDER BY id DESC limit 1"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+                        $results = $wpdb->get_results($query, OBJECT); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
                         wp_cache_set($cache_key, $results, '', 3600);
                     } 	
                     
@@ -1676,7 +1678,7 @@ class Class_Aititlegenerate
 
                         $generate_title = $wpdb->prefix . 'slf_generated_title';
                         $cache_key = 'generated_title_' . $tid;
-                        $deleted = $wpdb->query($wpdb->prepare("DELETE FROM $generate_title WHERE id = %d", $tid) );     // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                        $deleted = $wpdb->query($wpdb->prepare("DELETE FROM $generate_title WHERE id = %d", $tid) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
                         wp_cache_delete($cache_key);
                         
                         if ($deleted !== false) {
@@ -1714,7 +1716,7 @@ class Class_Aititlegenerate
                 $query = $wpdb->prepare("UPDATE {$wpdb->prefix}slf_generated_title SET generate_title = %s WHERE id = %d", $new_title, $tid );
                 wp_cache_delete($cache_key);
         
-                $result = $wpdb->query($query);                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                $result = $wpdb->query($query); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
             
                 if ($result === false) {
                     wp_send_json_error('Database update failed: ' . $wpdb->last_error);

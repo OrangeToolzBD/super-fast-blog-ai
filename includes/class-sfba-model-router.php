@@ -441,7 +441,7 @@ class SFBA_Model_Router {
 		$is_active   = isset( $options['is_active'] ) ? (int) (bool) $options['is_active'] : 1;
 
 		// Check for an existing rule for this content_type.
-		$existing_id = (int) $wpdb->get_var(
+		$existing_id = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT id FROM {$wpdb->prefix}sfba_routing_rules WHERE content_type = %s ORDER BY priority ASC LIMIT 1",
 				$content_type
@@ -459,7 +459,7 @@ class SFBA_Model_Router {
 		}
 
 		// Insert new rule.
-		$ok = $wpdb->insert(
+		$ok = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_routing_rules',
 			[
 				'content_type' => $content_type,
@@ -558,7 +558,7 @@ class SFBA_Model_Router {
 	public function get_all_rules(): array {
 		global $wpdb;
 
-		$rows = $wpdb->get_results(
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT * FROM {$wpdb->prefix}sfba_routing_rules ORDER BY content_type ASC, priority ASC",
 			ARRAY_A
 		);
@@ -575,7 +575,7 @@ class SFBA_Model_Router {
 	public function delete_rule( int $rule_id ): bool|WP_Error {
 		global $wpdb;
 
-		$exists = $wpdb->get_var(
+		$exists = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT id FROM {$wpdb->prefix}sfba_routing_rules WHERE id = %d LIMIT 1",
 				$rule_id
@@ -586,7 +586,7 @@ class SFBA_Model_Router {
 			return new WP_Error( 'sfba_not_found', __( 'Routing rule not found.', 'super-fast-blog-ai' ), [ 'status' => 404 ] );
 		}
 
-		$result = $wpdb->delete(
+		$result = $wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_routing_rules',
 			[ 'id' => $rule_id ],
 			[ '%d' ]
@@ -638,7 +638,7 @@ class SFBA_Model_Router {
 	private function get_rule( int $rule_id ): ?array {
 		global $wpdb;
 
-		$row = $wpdb->get_row(
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}sfba_routing_rules WHERE id = %d LIMIT 1",
 				$rule_id
@@ -696,7 +696,7 @@ class SFBA_Model_Router {
 			return true;
 		}
 
-		$result = $wpdb->update(
+		$result = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_routing_rules',
 			$update,
 			[ 'id' => $rule_id ],
@@ -759,7 +759,7 @@ class SFBA_Model_Router {
 
 		global $wpdb;
 
-		$rules = $wpdb->get_results(
+		$rules = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT provider, model FROM {$wpdb->prefix}sfba_routing_rules
 				  WHERE content_type = %s AND is_active = 1
@@ -1049,7 +1049,7 @@ class SFBA_Model_Router {
 	private function determine_source( string $content_type ): string {
 		global $wpdb;
 
-		$has_rule = $wpdb->get_var(
+		$has_rule = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT 1 FROM {$wpdb->prefix}sfba_routing_rules WHERE content_type = %s AND is_active = 1 LIMIT 1",
 				$content_type

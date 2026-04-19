@@ -150,7 +150,7 @@ class SFBA_Settings {
 		?>
 		<style>
 		#adminmenu #toplevel_page_super-fast-blog-ai .wp-menu-image {
-			background-image: url('<?php echo $icon_url; ?>') !important;
+			background-image: url('<?php echo $icon_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>') !important;
 			background-repeat: no-repeat !important;
 			background-position: center center !important;
 			background-size: 28px 28px !important;

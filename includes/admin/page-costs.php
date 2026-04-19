@@ -11,6 +11,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $status_colors = [
 	'ok'       => 'green',

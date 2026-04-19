@@ -528,7 +528,7 @@ class SFBA_Internal_Linker {
 			'post_type'      => $this->indexable_post_types(),
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			'exclude'        => [ $post_id ],
+			'exclude'        => [ $post_id ], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 			'no_found_rows'  => true,
 		] );
 
@@ -614,8 +614,8 @@ class SFBA_Internal_Linker {
 			return new WP_Error( 'sfba_invalid_input', __( 'URL cannot be empty.', 'super-fast-blog-ai' ) );
 		}
 
-		$site_host = parse_url( get_site_url(), PHP_URL_HOST );
-		$url_host  = parse_url( $url, PHP_URL_HOST );
+		$site_host = wp_parse_url( get_site_url(), PHP_URL_HOST );
+		$url_host  = wp_parse_url( $url, PHP_URL_HOST );
 		if ( null !== $url_host && $url_host !== $site_host ) {
 			return new WP_Error(
 				'sfba_external_url',
@@ -690,11 +690,12 @@ class SFBA_Internal_Linker {
 		global $wpdb;
 		$table = $wpdb->prefix . 'sfba_internal_links';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$exists = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM {$table} WHERE source_post_id = %d AND target_post_id = 0",
 			$post->ID
 		) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( $exists && ! $overwrite ) {
 			return false;
@@ -743,7 +744,7 @@ class SFBA_Internal_Linker {
 		global $wpdb;
 		$table = $wpdb->prefix . 'sfba_internal_links';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT source_post_id, anchor_text, target_url, context, created_at
 			 FROM {$table}
@@ -753,6 +754,7 @@ class SFBA_Internal_Linker {
 			 ORDER BY created_at DESC",
 			$exclude_post_id
 		), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( empty( $rows ) ) {
 			return [];
@@ -779,13 +781,14 @@ class SFBA_Internal_Linker {
 		global $wpdb;
 		$table = $wpdb->prefix . 'sfba_internal_links';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$row = $wpdb->get_row( $wpdb->prepare(
 			"SELECT source_post_id, anchor_text, target_url, context
 			 FROM {$table}
 			 WHERE source_post_id = %d AND target_post_id = 0",
 			$post_id
 		), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( ! $row ) {
 			return null;

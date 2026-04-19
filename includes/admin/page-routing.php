@@ -8,6 +8,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 ?>
 <div class="wrap sfba-admin-wrap sfba-routing-page">
 
@@ -71,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 			<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:30px;">
 				<?php foreach ( $type_icons as $type => $ti ) : ?>
 				<div style="display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:#fff;border:1.5px solid <?php echo esc_attr( $ti['border'] ); ?>;border-radius:50px;font-size:12.5px;font-weight:500;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.05);">
-					<?php echo $ti['icon']; ?>
+					<?php echo esc_html( $ti['icon'] ); ?>
 					<?php echo esc_html( $content_types[ $type ] ?? ucfirst( $type ) ); ?>
 				</div>
 				<?php endforeach; ?>
@@ -117,7 +118,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 		<div class="sfba-rule-row">
 			<div class="sfba-rc sfba-rc--type">
 				<div class="sfba-rc-type-inner" style="background:<?php echo esc_attr( $ti['color'] ); ?>;border-color:<?php echo esc_attr( $ti['border'] ); ?>;">
-					<span class="sfba-rc-icon"><?php echo $ti['icon']; ?></span>
+					<span class="sfba-rc-icon"><?php echo esc_html( $ti['icon'] ); ?></span>
 					<span class="sfba-rc-type-label"><?php echo esc_html( $type_label ); ?></span>
 				</div>
 			</div>

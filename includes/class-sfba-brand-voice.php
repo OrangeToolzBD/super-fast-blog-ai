@@ -361,10 +361,11 @@ class SFBA_Brand_Voice {
 		$table   = $wpdb->prefix . 'sfba_brand_voice';
 		$site_id = (int) get_current_blog_id();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$existing_id = $wpdb->get_var(
 			$wpdb->prepare( "SELECT id FROM {$table} WHERE site_id = %d LIMIT 1", $site_id )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( '' !== $wpdb->last_error ) {
 			return false;

@@ -104,12 +104,12 @@ final class SFBA_Core {
 
 	/** Prevent cloning. */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'SFBA_Core cannot be cloned.', 'super-fast-blog-ai' ), SFBA_VERSION );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'SFBA_Core cannot be cloned.', 'super-fast-blog-ai' ), esc_html( SFBA_VERSION ) );
 	}
 
 	/** Prevent unserialization. */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'SFBA_Core cannot be unserialized.', 'super-fast-blog-ai' ), SFBA_VERSION );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'SFBA_Core cannot be unserialized.', 'super-fast-blog-ai' ), esc_html( SFBA_VERSION ) );
 	}
 
 	// -------------------------------------------------------------------------

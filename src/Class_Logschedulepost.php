@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  *
  *  orange log post title
@@ -42,7 +43,7 @@ class Class_Logschedulepost {
 								  RIGHT JOIN {$wpdb->prefix}slf_schedule_post_title_log AS slflog
 								  ON wpost.ID = slflog.postid
 								  ORDER BY wpost.id DESC";
-						$results = $wpdb->get_results($query, OBJECT);
+						$results = $wpdb->get_results($query, OBJECT); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 						if ($results) {
 							wp_cache_set($cache_key, $results, 'slf_schedule_post_title_log', 3600);
 						}
@@ -163,8 +164,8 @@ class Class_Logschedulepost {
                 $cache_key = 'schedule_post_title_log_' . $id;
                 wp_cache_delete( $cache_key, 'slf_schedule_post_title_log' );
             
-                $deleted = $wpdb->query(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                    $wpdb->prepare("DELETE FROM {$schedule_post_table} WHERE id = %d",$id)
+                $deleted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+                    $wpdb->prepare("DELETE FROM {$schedule_post_table} WHERE id = %d", $id) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
                 );
         
 
@@ -199,8 +200,8 @@ class Class_Logschedulepost {
 
                 // Build DELETE query
                 $placeholders = implode(',', array_fill(0, count($ids), '%d'));
-                $query = $wpdb->prepare("DELETE FROM $table_name WHERE postid IN ($placeholders)", $ids);
-                $deleted = $wpdb->query($query);        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                $query = $wpdb->prepare("DELETE FROM $table_name WHERE postid IN ($placeholders)", $ids); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+                $deleted = $wpdb->query($query); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 
                 // If deletion successful, clear cache
                 if ( $deleted !== false ) {

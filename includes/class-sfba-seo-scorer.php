@@ -388,6 +388,7 @@ class SFBA_Seo_Scorer {
 				'triggered' => $phrase_triggered,
 				'value'     => $phrase_hits,
 				'message'   => sprintf(
+					/* translators: %d is the number of overused AI phrases found */
 					_n( '%d overused AI phrase found.', '%d overused AI phrases found.', $phrase_hits, 'super-fast-blog-ai' ),
 					$phrase_hits
 				),
@@ -407,6 +408,7 @@ class SFBA_Seo_Scorer {
 				'triggered' => $passive_triggered,
 				'value'     => round( $passive_ratio * 100, 1 ),
 				'message'   => sprintf(
+					/* translators: %s is the percentage of sentences using passive voice */
 					__( '%s%% of sentences use passive voice.', 'super-fast-blog-ai' ),
 					round( $passive_ratio * 100, 1 )
 				),
@@ -417,6 +419,7 @@ class SFBA_Seo_Scorer {
 				'triggered' => $transition_triggered,
 				'value'     => $transition_hits,
 				'message'   => sprintf(
+					/* translators: %d is the number of formal transition words found */
 					_n( '%d formal transition word.', '%d formal transition words.', $transition_hits, 'super-fast-blog-ai' ),
 					$transition_hits
 				),
@@ -539,7 +542,7 @@ class SFBA_Seo_Scorer {
 				__( 'Keyword density', 'super-fast-blog-ai' ),
 				$max,
 				$value_str,
-				sprintf( __( 'Keyword density is %s — this may be seen as keyword stuffing. Target 0.5–2.5%%.', 'super-fast-blog-ai' ), $value_str )
+				/* translators: %s or %d is a count/score/number */ sprintf( __( 'Keyword density is %s — this may be seen as keyword stuffing. Target 0.5–2.5%%.', 'super-fast-blog-ai' ), $value_str )
 			);
 		}
 
@@ -550,7 +553,7 @@ class SFBA_Seo_Scorer {
 				$max,
 				(int) round( $max * 0.4 ),
 				$value_str,
-				sprintf( __( 'Keyword density is %s — slightly high. Aim for 0.5–2.5%%.', 'super-fast-blog-ai' ), $value_str )
+				/* translators: %s or %d is a count/score/number */ sprintf( __( 'Keyword density is %s — slightly high. Aim for 0.5–2.5%%.', 'super-fast-blog-ai' ), $value_str )
 			);
 		}
 
@@ -562,7 +565,7 @@ class SFBA_Seo_Scorer {
 				$max,
 				$points,
 				$value_str,
-				sprintf( __( 'Keyword density is %s — within the ideal range.', 'super-fast-blog-ai' ), $value_str )
+				/* translators: %s or %d is a count/score/number */ sprintf( __( 'Keyword density is %s — within the ideal range.', 'super-fast-blog-ai' ), $value_str )
 			);
 		}
 
@@ -572,7 +575,7 @@ class SFBA_Seo_Scorer {
 			$max,
 			(int) round( $max * 0.3 ),
 			$value_str,
-			sprintf( __( 'Keyword density is %s — too low. Use the keyword more naturally throughout the content.', 'super-fast-blog-ai' ), $value_str )
+			/* translators: %s or %d is a count/score/number */ sprintf( __( 'Keyword density is %s — too low. Use the keyword more naturally throughout the content.', 'super-fast-blog-ai' ), $value_str )
 		);
 	}
 
@@ -614,10 +617,12 @@ class SFBA_Seo_Scorer {
 		$value    = "avg:{$avg} words, max:{$max_para} words";
 
 		if ( $max_para > self::PARA_HARD_MAX ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->fail_check( $id, __( 'Paragraph length', 'super-fast-blog-ai' ), $max, $value, sprintf( __( 'One paragraph has %d words — break it into smaller chunks for readability.', 'super-fast-blog-ai' ), $max_para ) );
 		}
 
 		if ( $avg > self::PARA_AVG_MAX ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->warn_check( $id, __( 'Paragraph length', 'super-fast-blog-ai' ), $max, (int) round( $max * 0.5 ), $value, sprintf( __( 'Average paragraph is %d words. Try to keep paragraphs under 150 words for readability.', 'super-fast-blog-ai' ), $avg ) );
 		}
 
@@ -637,9 +642,11 @@ class SFBA_Seo_Scorer {
 		}
 
 		if ( $count < $needed ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->warn_check( $id, __( 'Internal links', 'super-fast-blog-ai' ), $max, (int) round( $max * ( $count / $needed ) ), $value, sprintf( __( 'Found %1$d internal link(s) — consider adding %2$d for this length.', 'super-fast-blog-ai' ), $count, $needed ) );
 		}
 
+		/* translators: %s or %d is a count/score/number */
 		return $this->pass_check( $id, __( 'Internal links', 'super-fast-blog-ai' ), $max, $max, $value, sprintf( _n( '%d internal link — good.', '%d internal links — good.', $count, 'super-fast-blog-ai' ), $count ) );
 	}
 
@@ -650,17 +657,21 @@ class SFBA_Seo_Scorer {
 		$value = "{$words} words";
 
 		if ( $words < self::LENGTH_MIN ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->fail_check( $id, __( 'Content length', 'super-fast-blog-ai' ), $max, $value, sprintf( __( 'Content is %d words — too short. Aim for at least 600 words for most topics.', 'super-fast-blog-ai' ), $words ) );
 		}
 
 		if ( $words < self::LENGTH_GOOD ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->warn_check( $id, __( 'Content length', 'super-fast-blog-ai' ), $max, (int) round( $max * 0.5 ), $value, sprintf( __( 'Content is %d words. Adding more depth (target 600+ words) improves ranking potential.', 'super-fast-blog-ai' ), $words ) );
 		}
 
 		if ( $words < self::LENGTH_GREAT ) {
+			/* translators: %s or %d is a count/score/number */
 			return $this->pass_check( $id, __( 'Content length', 'super-fast-blog-ai' ), $max, (int) round( $max * 0.8 ), $value, sprintf( __( 'Content is %d words — solid length. 1000+ words gives an edge on competitive topics.', 'super-fast-blog-ai' ), $words ) );
 		}
 
+		/* translators: %s or %d is a count/score/number */
 		return $this->pass_check( $id, __( 'Content length', 'super-fast-blog-ai' ), $max, $max, $value, sprintf( __( 'Content is %d words — excellent depth.', 'super-fast-blog-ai' ), $words ) );
 	}
 
@@ -679,6 +690,7 @@ class SFBA_Seo_Scorer {
 
 		if ( $len < 50 || $len > 160 ) {
 			$too = $len < 50 ? 'too short' : 'too long';
+			/* translators: %s or %d is a count/score/number */
 			return $this->warn_check( $id, __( 'Meta description', 'super-fast-blog-ai' ), $max, (int) round( $max * 0.4 ), $value, sprintf( __( 'Meta description is %2$d characters (%1$s). Ideal length is 50–160 characters.', 'super-fast-blog-ai' ), $too, $len ) );
 		}
 
@@ -708,6 +720,7 @@ class SFBA_Seo_Scorer {
 		$ratio  = $missing / $total;
 		$points = (int) round( $max * ( 1 - $ratio ) );
 
+		/* translators: %s or %d is a count/score/number */
 		return $this->warn_check( $id, __( 'Image alt text', 'super-fast-blog-ai' ), $max, $points, $value, sprintf( _n( '%d image is missing alt text.', '%d images are missing alt text.', $missing, 'super-fast-blog-ai' ), $missing ) );
 	}
 

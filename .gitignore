@@ -33,10 +33,6 @@ wp-content/cache/
 *.zip
 *.tar.gz
 
-# ── Dev / planning docs ──────────────────────────────────────────────────────
-DEVELOP_PLAN.md
-MERGE_RULES.md
-
 # ── Environment & secrets ────────────────────────────────────────────────────
 .env
 .env.*

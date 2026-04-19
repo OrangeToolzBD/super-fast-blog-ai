@@ -66,9 +66,9 @@ class OpenAIClient {
     private function handleError(RequestException $e) {
         if ($e->hasResponse()) {
             $responseBody = json_decode($e->getResponse()->getBody(), true);
-            throw new OpenAIException("Error: " . $responseBody['error']['message'], $e->getCode());
+            throw new OpenAIException("Error: " . $responseBody['error']['message'], $e->getCode()); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         } else {
-            throw new OpenAIException("Network error: " . $e->getMessage(), $e->getCode());
+            throw new OpenAIException("Network error: " . $e->getMessage(), $e->getCode()); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
     }
 
@@ -109,7 +109,7 @@ class OpenAIClient {
 
             // You can define your own threshold, for example, 1000 tokens
             if ($totalTokens > 1000) {
-                error_log("Usage alert: Total tokens exceeded the threshold. Used: " . $totalTokens);
+                error_log("Usage alert: Total tokens exceeded the threshold. Used: " . $totalTokens); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             }
         }
     }

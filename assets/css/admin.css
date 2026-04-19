@@ -330,7 +330,7 @@
 }
 .sfba-btn:disabled { opacity: .55; cursor: not-allowed; }
 .sfba-btn-primary   { background: var(--sfba-blue); color: #fff; border-color: var(--sfba-blue-dark); }
-.sfba-btn-primary:hover:not(:disabled)   { background: var(--sfba-blue-dark); }
+.sfba-btn-primary:hover:not(:disabled)   { background: var(--sfba-blue-dark); color: #fff; }
 .sfba-btn-secondary { background: #fff; color: var(--sfba-grey-900); border-color: var(--sfba-grey-200); }
 .sfba-btn-secondary:hover:not(:disabled) { background: var(--sfba-grey-100); }
 .sfba-btn-danger    { background: #fff; color: var(--sfba-red); border-color: #fecaca; }

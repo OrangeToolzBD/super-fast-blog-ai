@@ -7,6 +7,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $platforms = [
 	'twitter'   => [ 'icon' => '🐦', 'label' => 'Twitter / X',  'color' => '#1da1f2' ],
@@ -34,8 +35,19 @@ $platforms = [
 
 	<div id="sfba-rep-notice" class="sfba-notice" style="display:none;margin-bottom:12px;"></div>
 
+	<?php if ( $connected === 0 ) : ?>
+	<div class="sfba-info-box" style="margin-bottom:20px;">
+		<h4 style="margin:0 0 6px;">⚠️ <?php esc_html_e( 'No AI Provider Configured', 'super-fast-blog-ai' ); ?></h4>
+		<p style="margin:0 0 12px;"><?php esc_html_e( 'You need to add at least one API key before you can repurpose content.', 'super-fast-blog-ai' ); ?></p>
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=sfba-settings#providers' ) ); ?>"
+		   class="sfba-btn sfba-btn-primary sfba-btn-sm">
+			⚙️ <?php esc_html_e( 'Go to Settings → Providers', 'super-fast-blog-ai' ); ?>
+		</a>
+	</div>
+	<?php endif; ?>
+
 	<!-- Post selector -->
-	<div class="sfba-card" style="margin-bottom:16px;">
+	<div class="sfba-card" style="margin-bottom:16px;<?php echo $connected === 0 ? 'opacity:0.45;pointer-events:none;user-select:none;' : ''; ?>">
 		<h3 style="margin:0 0 16px;"><?php esc_html_e( 'Select a Post to Repurpose', 'super-fast-blog-ai' ); ?></h3>
 		<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
 			<div style="flex:1;min-width:220px;">
@@ -60,7 +72,7 @@ $platforms = [
 	</div>
 
 	<!-- Hashtag Language — single line -->
-	<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+	<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04);<?php echo $connected === 0 ? 'opacity:0.45;pointer-events:none;user-select:none;' : ''; ?>">
 		<span style="font-size:12px;font-weight:600;color:#6b7280;white-space:nowrap;flex-shrink:0;">
 			# <?php esc_html_e( 'Hashtag Language', 'super-fast-blog-ai' ); ?>
 		</span>
@@ -82,11 +94,11 @@ $platforms = [
 	</div>
 
 	<!-- Platform grid -->
-	<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+	<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;<?php echo $connected === 0 ? 'opacity:0.45;pointer-events:none;user-select:none;' : ''; ?>">
 		<?php foreach ( $platforms as $slug => $p ) : ?>
 		<div class="sfba-card" style="border-top:3px solid <?php echo esc_attr( $p['color'] ); ?>;">
 			<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-				<span style="font-size:22px;"><?php echo $p['icon']; ?></span>
+				<span style="font-size:22px;"><?php echo esc_html( $p['icon'] ); ?></span>
 				<strong style="font-size:14px;"><?php echo esc_html( $p['label'] ); ?></strong>
 			</div>
 			<button type="button"
@@ -111,13 +123,32 @@ $platforms = [
 	</div>
 
 	<!-- Repurpose all -->
-	<div class="sfba-card" style="margin-top:20px;text-align:center;">
-		<button type="button" id="sfba-rep-all-btn" class="sfba-btn sfba-btn-primary sfba-btn-lg">
+	<div class="sfba-card" style="margin-top:20px;text-align:center;<?php echo $connected === 0 ? 'opacity:0.45;pointer-events:none;user-select:none;' : ''; ?>">
+		<button type="button" id="sfba-rep-all-btn" class="sfba-btn sfba-btn-primary sfba-btn-lg"
+		        <?php echo $connected === 0 ? 'disabled' : ''; ?>>
 			✨ <?php esc_html_e( 'Repurpose for All Platforms', 'super-fast-blog-ai' ); ?>
 		</button>
 		<p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">
 			<?php esc_html_e( 'Generates content for all 6 platforms at once.', 'super-fast-blog-ai' ); ?>
 		</p>
+
+		<!-- Progress bar (hidden until Generate All is clicked) -->
+		<div id="sfba-rep-progress" style="display:none;margin-top:18px;text-align:left;">
+			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+				<span id="sfba-rep-progress-label" style="font-size:12px;font-weight:600;color:#374151;"></span>
+				<span id="sfba-rep-progress-pct" style="font-size:11px;color:#6b7280;font-weight:500;"></span>
+			</div>
+			<div style="width:100%;height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;">
+				<div id="sfba-rep-progress-bar"
+				     style="height:100%;width:0%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1),background .4s ease;background:linear-gradient(90deg,#2563eb,#7c3aed);"></div>
+			</div>
+			<div style="display:flex;justify-content:space-between;margin-top:8px;">
+				<span id="sfba-rep-step-analyse" style="font-size:11px;color:#9ca3af;transition:color .3s;">🔍 <?php esc_html_e( 'Analysing', 'super-fast-blog-ai' ); ?></span>
+				<span id="sfba-rep-step-writing" style="font-size:11px;color:#9ca3af;transition:color .3s;">✍️ <?php esc_html_e( 'Writing', 'super-fast-blog-ai' ); ?></span>
+				<span id="sfba-rep-step-finish"  style="font-size:11px;color:#9ca3af;transition:color .3s;">✨ <?php esc_html_e( 'Finishing', 'super-fast-blog-ai' ); ?></span>
+				<span id="sfba-rep-step-done"    style="font-size:11px;color:#9ca3af;transition:color .3s;">✅ <?php esc_html_e( 'Done', 'super-fast-blog-ai' ); ?></span>
+			</div>
+		</div>
 	</div>
 
 </div>
@@ -125,8 +156,9 @@ $platforms = [
 <script>
 ( function () {
 	'use strict';
-	const apiBase = <?php echo wp_json_encode( $api_base ); ?>;
-	const nonce   = <?php echo wp_json_encode( $nonce ); ?>;
+	const apiBase    = <?php echo wp_json_encode( $api_base ); ?>;
+	const nonce      = <?php echo wp_json_encode( $nonce ); ?>;
+	const hasProvider = <?php echo wp_json_encode( $connected > 0 ); ?>;
 
 	// ── Hashtag language pill toggle ─────────────────────────────────────────
 	function syncPill( checkboxId, labelId, dotId, activeColor ) {
@@ -180,16 +212,17 @@ $platforms = [
 		if ( ! result || typeof result !== 'object' ) return String( result );
 		switch ( platform ) {
 			case 'twitter':
-				return Array.isArray( result.thread )
-					? result.thread.map( ( t, i ) => ( i + 1 ) + '. ' + t ).join( '\n\n' )
-					: ( result.single || '' );
+				return result.single || '';
 			case 'linkedin': {
 				let lk = result.post || '';
 				if ( result.hashtags?.length ) lk += '\n\n' + result.hashtags.map( h => '#' + h ).join( ' ' );
 				return lk;
 			}
-			case 'facebook':
-				return result.post || '';
+			case 'facebook': {
+				let fb = result.post || '';
+				if ( result.hashtags?.length ) fb += '\n\n' + result.hashtags.map( h => '#' + h ).join( ' ' );
+				return fb;
+			}
 			case 'email': {
 				let em = '';
 				if ( result.subject )      em += 'Subject: '  + result.subject      + '\n';
@@ -235,6 +268,7 @@ $platforms = [
 	// ── Per-platform buttons ──────────────────────────────────────────────────
 	document.querySelectorAll( '.sfba-rep-platform-btn' ).forEach( btn => {
 		btn.addEventListener( 'click', async function () {
+			if ( ! hasProvider ) { notice( 'No AI provider configured. Please add an API key in Settings → Providers.', 'error' ); return; }
 			const platform = this.dataset.platform;
 			const input    = getInput();
 			if ( ! input.post_id && ! input.content ) { notice( 'Please select a post or paste content.', 'error' ); return; }
@@ -248,20 +282,78 @@ $platforms = [
 		} );
 	} );
 
+	// ── Progress bar helpers ──────────────────────────────────────────────────
+	const progressWrap  = document.getElementById( 'sfba-rep-progress' );
+	const progressBar   = document.getElementById( 'sfba-rep-progress-bar' );
+	const progressLabel = document.getElementById( 'sfba-rep-progress-label' );
+	const progressPct   = document.getElementById( 'sfba-rep-progress-pct' );
+	const stepEls = {
+		analyse: document.getElementById( 'sfba-rep-step-analyse' ),
+		writing: document.getElementById( 'sfba-rep-step-writing' ),
+		finish:  document.getElementById( 'sfba-rep-step-finish' ),
+		done:    document.getElementById( 'sfba-rep-step-done' ),
+	};
+	let progressTimers = [];
+
+	function setProgress( pct, label, activeStep, barColor ) {
+		if ( progressBar )   { progressBar.style.width      = pct + '%'; if ( barColor ) progressBar.style.background = barColor; }
+		if ( progressLabel ) progressLabel.textContent = label;
+		if ( progressPct )   progressPct.textContent   = Math.round( pct ) + '%';
+		Object.entries( stepEls ).forEach( ( [ key, el ] ) => {
+			if ( ! el ) return;
+			el.style.color      = key === activeStep ? '#2563eb' : '#9ca3af';
+			el.style.fontWeight = key === activeStep ? '700'     : '400';
+		} );
+	}
+
+	function startProgress() {
+		if ( ! progressWrap ) return;
+		progressTimers.forEach( clearTimeout );
+		progressTimers = [];
+		progressWrap.style.display = 'block';
+
+		setProgress( 5,  '🔍 Analysing content…',            'analyse', 'linear-gradient(90deg,#2563eb,#7c3aed)' );
+		progressTimers.push( setTimeout( () => setProgress( 22, '🔍 Analysing content…',            'analyse', null ), 800 ) );
+		progressTimers.push( setTimeout( () => setProgress( 38, '✍️ Writing for all platforms…',     'writing', null ), 2500 ) );
+		progressTimers.push( setTimeout( () => setProgress( 55, '✍️ Writing for all platforms…',     'writing', null ), 4500 ) );
+		progressTimers.push( setTimeout( () => setProgress( 70, '✨ Finishing up…',                  'finish',  null ), 7000 ) );
+		progressTimers.push( setTimeout( () => setProgress( 83, '✨ Almost there…',                  'finish',  null ), 10000 ) );
+		progressTimers.push( setTimeout( () => setProgress( 91, '✨ Wrapping things up…',            'finish',  null ), 14000 ) );
+	}
+
+	function finishProgress( success ) {
+		progressTimers.forEach( clearTimeout );
+		progressTimers = [];
+		if ( success ) {
+			setProgress( 100, '✅ All platforms generated!', 'done', 'linear-gradient(90deg,#16a34a,#15803d)' );
+		} else {
+			setProgress( 100, '❌ Generation failed.',       'done', 'linear-gradient(90deg,#dc2626,#b91c1c)' );
+		}
+		setTimeout( () => { if ( progressWrap ) progressWrap.style.display = 'none'; }, 3500 );
+	}
+
 	// ── Generate All button ───────────────────────────────────────────────────
 	document.getElementById( 'sfba-rep-all-btn' )?.addEventListener( 'click', async function () {
+		if ( ! hasProvider ) { notice( 'No AI provider configured. Please add an API key in Settings → Providers.', 'error' ); return; }
 		const input = getInput();
 		if ( ! input.post_id && ! input.content ) { notice( 'Please select a post or paste content.', 'error' ); return; }
-		this.disabled = true; this.textContent = '✨ Generating…';
+		this.disabled = true; this.textContent = '⏳ Generating…';
+		startProgress();
 		try {
 			const r    = await fetch( apiBase + '/repurpose', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': nonce }, body: JSON.stringify( input ) } );
 			const data = await r.json();
 			if ( data.success ) {
 				const results = data.data?.results || {};
 				Object.keys( results ).forEach( pl => showResult( pl, results[ pl ] ) );
-				notice( 'All platforms generated.', 'success' );
-			} else { notice( data.message || 'Generation failed.', 'error' ); }
-		} catch ( e ) { notice( 'Network error.', 'error' ); }
+				finishProgress( true );
+			} else {
+				finishProgress( false );
+				notice( data.message || 'Generation failed.', 'error' );
+			}
+		} catch ( e ) {
+			finishProgress( false );
+			notice( 'Network error.', 'error' );
+		}
 		this.disabled = false; this.textContent = '✨ Repurpose for All Platforms';
 	} );
 

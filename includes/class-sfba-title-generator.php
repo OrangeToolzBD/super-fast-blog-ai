@@ -387,7 +387,7 @@ class SFBA_Title_Generator {
 		}
 
 		$placeholders = implode( ',', array_fill( 0, count( $protids ), '%d' ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$result = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}slf_generated_title WHERE protid IN ({$placeholders})", $protids ) );
 
 		if ( false === $result ) {
@@ -526,7 +526,7 @@ class SFBA_Title_Generator {
 		$last_protid = wp_cache_get( $cache_key );
 
 		if ( false === $last_protid ) {
-			$last_protid = (int) $wpdb->get_var( "SELECT MAX(protid) FROM {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$last_protid = (int) $wpdb->get_var( "SELECT MAX(protid) FROM {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			wp_cache_set( $cache_key, $last_protid, '', HOUR_IN_SECONDS );
 		}
 

@@ -10,6 +10,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $s = $this->core->settings;
 ?>
@@ -396,7 +397,7 @@ $s = $this->core->settings;
 						       <?php checked( $s->get( $opt['key'], false ) ); ?>>
 						<span class="sfba-opt-toggle-face">
 							<span class="sfba-opt-tick">✓</span>
-							<span><?php echo $opt['icon']; ?> <?php echo esc_html( $opt['label'] ); ?></span>
+							<span><?php echo esc_html( $opt['icon'] ); ?> <?php echo esc_html( $opt['label'] ); ?></span>
 						</span>
 					</label>
 					<?php endforeach; ?>
@@ -427,7 +428,7 @@ $s = $this->core->settings;
 					foreach ( $psteps as $n => $ps ) :
 					?>
 					<div class="sfba-pstep" id="sfba-pstep-<?php echo esc_attr( $n ); ?>">
-						<div class="sfba-pstep-dot"><?php echo $ps['icon']; ?></div>
+						<div class="sfba-pstep-dot"><?php echo esc_html( $ps['icon'] ); ?></div>
 						<span style="margin-top:3px;"><?php echo esc_html( $ps['label'] ); ?></span>
 					</div>
 					<?php endforeach; ?>

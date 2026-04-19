@@ -165,6 +165,8 @@ class SFBA_Repurposer {
 			'orderby'        => 'date',
 			'order'          => 'DESC',
 		] );
+		$providers    = $this->core->providers->get_all_providers();
+		$connected    = count( array_filter( $providers, fn( $p ) => $p['has_key'] ) );
 
 		include SFBA_PLUGIN_DIR . 'includes/admin/page-repurpose.php';
 	}
@@ -354,7 +356,7 @@ class SFBA_Repurposer {
 	 */
 	public function generate_facebook_post( string $content, string $url = '', int $post_id = 0 ): array|WP_Error {
 		$prompt = $this->prompt_facebook( $content, $url );
-		$gen    = $this->call_ai( $prompt, 'social', 350, 0.8, $post_id, 'repurpose_facebook' );
+		$gen    = $this->call_ai( $prompt, 'social', 400, 0.8, $post_id, 'repurpose_facebook' );
 
 		if ( is_wp_error( $gen ) ) {
 			return $gen;
@@ -482,35 +484,33 @@ class SFBA_Repurposer {
 	}
 
 	private function prompt_twitter( string $content, array $key_points, string $url ): string {
-		$excerpt    = $this->safe_excerpt( $content, 800 );
-		$kp_section = '';
-		if ( ! empty( $key_points ) ) {
-			$kp_section = "\nKey points to cover:\n- " . implode( "\n- ", $key_points ) . "\n";
-		}
-		$cta_note = '' !== $url ? "Full article URL for the last tweet's CTA: {$url}" : '';
+		$excerpt  = $this->safe_excerpt( $content, 800 );
+		$url_note = '' !== $url ? "Article URL to include in the tweet: {$url}" : '';
+
+		// Calculate budget: 280 chars minus URL length (Twitter counts URLs as 23 chars).
+		$url_chars  = '' !== $url ? 25 : 0; // URL + 1 space.
+		$text_budget = 280 - $url_chars;
 
 		return implode( "\n", [
 			'IMPORTANT: This article is written in ' . $this->content_language . '. Write your ENTIRE response in ' . $this->content_language . '. Do not translate into any other language.',
 			'',
-			'Convert this article into a Twitter/X thread.',
+			'Write a single Twitter/X tweet to promote this article.',
 			'',
-			'Rules:',
-			'1. First tweet: a curiosity-inducing hook — do not reveal the conclusion.',
-			'2. Each tweet must be ≤280 characters.',
-			'3. Use short lines and line breaks for readability.',
-			'4. Last tweet: a CTA inviting readers to read the full article.',
-			'5. Total tweets: 5–10.',
-			'6. No hashtags in the body tweets. 2–3 hashtags on the last tweet only.',
-			'7. Hashtag rule: ' . $this->hashtag_lang_instruction(),
+			'Requirements:',
+			'1. STRICT maximum: 280 characters total (including the URL and hashtags).',
+			'2. Start with a punchy hook or key insight from the article — make people want to click.',
+			'3. Include 2–3 relevant hashtags at the end.',
+			'4. Hashtag rule: ' . $this->hashtag_lang_instruction(),
+			'' !== $url ? '5. End with the article URL: ' . $url : '',
 			'',
-			$cta_note,
-			$kp_section,
+			$url_note,
+			'',
 			'Article content:',
 			'---',
 			$excerpt,
 			'---',
 			'',
-			'Return ONLY a numbered list of tweets, one per line (1. … 2. … etc). No extra commentary.',
+			'Return ONLY the single tweet text — no labels, no explanation, no quotes around it. The tweet must be ≤280 characters.',
 		] );
 	}
 
@@ -582,7 +582,8 @@ class SFBA_Repurposer {
 			'3. Casual, friendly tone — like you\'re sharing with a friend.',
 			'4. End with a soft CTA inviting readers to check it out.',
 			'5. Under 250 words.',
-			'6. No hashtags.',
+			'6. Add 3–5 relevant hashtags on a new line at the very end of the post.',
+			'7. Hashtag rule: ' . $this->hashtag_lang_instruction(),
 			'',
 			$cta_note,
 			'',
@@ -654,31 +655,45 @@ class SFBA_Repurposer {
 	// -------------------------------------------------------------------------
 
 	private function parse_twitter( string $text, string $url, bool $is_mock ): array {
-		$json = $this->try_json_decode( $text );
-		if ( is_array( $json ) && isset( $json[0] ) ) {
-			$tweets = array_map( 'sanitize_textarea_field', $json );
-		} else {
-			$tweets = $this->parse_numbered_list( $text );
+		if ( $is_mock ) {
+			$mock = $this->mock_twitter_single( $url );
+			return [
+				'single'     => $mock,
+				'char_count' => mb_strlen( $mock ),
+				'mock'       => true,
+			];
 		}
 
-		$tweets = array_map( function ( $tweet ) {
-			return mb_substr( trim( $tweet ), 0, self::TWITTER_MAX_CHARS );
-		}, $tweets );
+		// Strip markdown fences or JSON wrapping the AI might add.
+		$tweet = trim( $text );
+		$tweet = preg_replace( '/^```[a-z]*\s*/i', '', $tweet );
+		$tweet = preg_replace( '/\s*```$/m', '', $tweet );
+		$tweet = trim( $tweet );
 
-		$tweets = array_values( array_filter( $tweets, fn( $t ) => '' !== $t ) );
+		// Strip any leading number prefix the AI may have added.
+		$tweet = preg_replace( '/^(?:Tweet\s+)?[\(\[]?\d+[\.\)\/\]]?\s*/i', '', $tweet );
 
-		if ( count( $tweets ) < self::TWITTER_MIN_TWEETS ) {
-			$tweets = $this->mock_twitter_thread( $url, $is_mock );
+		// Strip surrounding quotes.
+		$tweet = trim( $tweet, "\"'" );
+
+		// Sanitize but do NOT hard-cap at 280 — Twitter counts URLs as 23 chars
+		// regardless of their actual length, so slicing at 280 would cut the URL mid-way.
+		// The AI prompt already instructs it to stay within 280 chars.
+		$tweet = sanitize_textarea_field( $tweet );
+
+		if ( mb_strlen( $tweet ) < 10 ) {
+			$mock = $this->mock_twitter_single( $url );
+			return [
+				'single'     => $mock,
+				'char_count' => mb_strlen( $mock ),
+				'mock'       => true,
+			];
 		}
-
-		$char_counts = array_map( 'mb_strlen', $tweets );
 
 		return [
-			'thread'      => $tweets,
-			'single'      => $tweets[0] ?? '',
-			'char_counts' => $char_counts,
-			'tweet_count' => count( $tweets ),
-			'mock'        => $is_mock,
+			'single'     => $tweet,
+			'char_count' => mb_strlen( $tweet ),
+			'mock'       => false,
 		];
 	}
 
@@ -743,7 +758,23 @@ class SFBA_Repurposer {
 			return $this->mock_facebook( true );
 		}
 
-		$text       = trim( $text );
+		$text     = trim( $text );
+		$lines    = explode( "\n", $text );
+		$hashtags = [];
+
+		// Pull hashtags off the last non-empty line.
+		$last_idx = count( $lines ) - 1;
+		while ( $last_idx >= 0 && '' === trim( $lines[ $last_idx ] ) ) {
+			$last_idx--;
+		}
+		if ( $last_idx >= 0 && str_contains( $lines[ $last_idx ], '#' ) ) {
+			preg_match_all( '/#([\w]+)/u', $lines[ $last_idx ], $matches );
+			$hashtags = $matches[1] ?? [];
+			unset( $lines[ $last_idx ] );
+			$text = trim( implode( "\n", $lines ) );
+		}
+
+		$hashtags   = array_slice( $hashtags, 0, 5 );
 		$word_count = str_word_count( $text );
 
 		if ( $word_count < 10 ) {
@@ -752,6 +783,7 @@ class SFBA_Repurposer {
 
 		return [
 			'post'       => $text,
+			'hashtags'   => $hashtags,
 			'word_count' => $word_count,
 			'mock'       => false,
 		];
@@ -829,21 +861,13 @@ class SFBA_Repurposer {
 	// Mock responses.
 	// -------------------------------------------------------------------------
 
-	private function mock_twitter_thread( string $url, bool $is_mock ): array {
-		$cta = '' !== $url ? "Read the full article: {$url} #content #writing" : 'Check the full article for more. #content #writing';
-
-		return [
-			'Most people get this completely wrong. Here\'s what nobody tells you about content repurposing 🧵',
-			'1/ You\'re leaving traffic on the table every time you publish a blog post without repurposing it.',
-			'2/ A single article can become: a Twitter thread, a LinkedIn post, an email newsletter, an Instagram caption, and a YouTube outline.',
-			'3/ The key is platform-native formatting. Not copy-paste. Each piece adapted to how that audience consumes content.',
-			'4/ Twitter/X: short punchy insights. Hashtags only on the last tweet.',
-			'5/ LinkedIn: professional tone, personal angle, ends with a question.',
-			'6/ Email: subject line creates FOMO. Body = 2 paragraphs. CTA = the click.',
-			'7/ Instagram: visual hook first line. Hashtag block at the bottom.',
-			'8/ YouTube: turn the article sections into a script outline with timestamps.',
-			"9/ [Mock response] Configure an AI provider in Super Fast Blog AI → Settings to generate real threads. {$cta}",
-		];
+	private function mock_twitter_single( string $url ): string {
+		$cta = '' !== $url ? " {$url}" : '';
+		return mb_substr(
+			"[Mock] Stop repurposing content the hard way. One article → Twitter, LinkedIn, Email, Instagram & YouTube — in minutes.{$cta} #ContentMarketing #AI",
+			0,
+			self::TWITTER_MAX_CHARS
+		);
 	}
 
 	private function mock_email( string $url, bool $is_mock ): array {
@@ -882,6 +906,7 @@ class SFBA_Repurposer {
 
 		return [
 			'post'       => $post,
+			'hashtags'   => [ 'ContentMarketing', 'Blogging', 'DigitalMarketing' ],
 			'word_count' => str_word_count( $post ),
 			'mock'       => $is_mock,
 		];
@@ -1045,6 +1070,7 @@ class SFBA_Repurposer {
 			'facebook'  => $this->generate_facebook_post( $source['plain'], $source['url'], $post_id ),
 			'instagram' => $this->generate_instagram_caption( $source['plain'], $post_id ),
 			'youtube'   => $this->generate_youtube_outline( $source['plain'], $source['title'], $source['url'], $post_id ),
+			/* translators: %s is replaced with the platform name */
 			default     => new WP_Error( 'sfba_invalid_platform', sprintf( __( 'Unknown platform: %s', 'super-fast-blog-ai' ), $platform ) ),
 		};
 	}
@@ -1152,11 +1178,33 @@ class SFBA_Repurposer {
 	}
 
 	/**
-	 * Parse a numbered plain-text list into an array of strings.
+	 * Parse a plain-text tweet list into an array of tweet strings.
+	 *
+	 * Handles two formats the AI may return:
+	 *   a) Blank-line-separated blocks (one tweet per paragraph).
+	 *   b) One tweet per line (legacy numbered format; numbers are stripped).
 	 *
 	 * @return string[]
 	 */
 	private function parse_numbered_list( string $text ): array {
+		// Try blank-line-separated blocks first (preferred new format).
+		$blocks = preg_split( '/\n\s*\n/', trim( $text ) );
+		if ( is_array( $blocks ) && count( $blocks ) >= 2 ) {
+			$items = [];
+			foreach ( $blocks as $block ) {
+				$block = trim( $block );
+				// Strip any leading number prefix (e.g. "1. ", "Tweet 1: ").
+				$block = preg_replace( '/^(?:Tweet\s+)?\d+[.:)\]\/]?\s*/i', '', $block );
+				if ( '' !== $block ) {
+					$items[] = $block;
+				}
+			}
+			if ( count( $items ) >= 2 ) {
+				return array_values( $items );
+			}
+		}
+
+		// Fallback: one tweet per line (numbered list).
 		$lines = array_filter(
 			array_map( 'trim', explode( "\n", $text ) ),
 			fn( $l ) => '' !== $l
@@ -1164,7 +1212,7 @@ class SFBA_Repurposer {
 
 		$items = [];
 		foreach ( $lines as $line ) {
-			$stripped = preg_replace( '/^[\(\[]?\d+[\.\)\]]?\s*/', '', $line );
+			$stripped = preg_replace( '/^(?:Tweet\s+)?[\(\[]?\d+[\.\)\]\/]?\s*/i', '', $line );
 			if ( '' !== $stripped ) {
 				$items[] = $stripped;
 			}

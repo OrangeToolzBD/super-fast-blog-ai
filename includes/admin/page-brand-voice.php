@@ -14,6 +14,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $has_profile = ! empty( $summary );
 $overrides   = $has_profile ? ( $summary['overrides'] ?? [] ) : [];
@@ -98,7 +99,7 @@ $post_count  = (int) $this->core->settings->get( 'brand_voice.post_count', 30 );
 			foreach ( $stats as $stat ) :
 			?>
 			<div class="sfba-profile-stat" style="display:flex;flex-direction:column;gap:4px;">
-				<span class="sfba-profile-stat-label"><?php echo $stat['icon']; ?> <?php echo esc_html( $stat['label'] ); ?></span>
+				<span class="sfba-profile-stat-label"><?php echo esc_html( $stat['icon'] ); ?> <?php echo esc_html( $stat['label'] ); ?></span>
 				<span class="sfba-profile-stat-value"><?php echo esc_html( $stat['value'] ); ?></span>
 			</div>
 			<?php endforeach; ?>
@@ -148,6 +149,7 @@ $post_count  = (int) $this->core->settings->get( 'brand_voice.post_count', 30 );
 					<option value="formal"  <?php selected( $overrides['tone'] ?? '', 'formal' ); ?>><?php esc_html_e( 'Formal', 'super-fast-blog-ai' ); ?></option>
 					<option value="casual"  <?php selected( $overrides['tone'] ?? '', 'casual' ); ?>><?php esc_html_e( 'Casual', 'super-fast-blog-ai' ); ?></option>
 				</select>
+				<?php /* translators: %s is a count/number */ ?>
 				<span class="sfba-field-hint"><?php printf( esc_html__( 'Detected: %s', 'super-fast-blog-ai' ), esc_html( $summary['tone'] ) ); ?></span>
 			</div>
 			<div class="sfba-field-group">
@@ -158,6 +160,7 @@ $post_count  = (int) $this->core->settings->get( 'brand_voice.post_count', 30 );
 					<option value="second" <?php selected( $overrides['pov'] ?? '', 'second' ); ?>><?php esc_html_e( 'Second person (You)', 'super-fast-blog-ai' ); ?></option>
 					<option value="third"  <?php selected( $overrides['pov'] ?? '', 'third'  ); ?>><?php esc_html_e( 'Third person (They)', 'super-fast-blog-ai' ); ?></option>
 				</select>
+				<?php /* translators: %s is a count/number */ ?>
 				<span class="sfba-field-hint"><?php printf( esc_html__( 'Detected: %s', 'super-fast-blog-ai' ), esc_html( $summary['pov'] ) ); ?></span>
 			</div>
 			<div class="sfba-field-group">
@@ -166,6 +169,7 @@ $post_count  = (int) $this->core->settings->get( 'brand_voice.post_count', 30 );
 				       value="<?php echo esc_attr( $overrides['sentence_length'] ?? '' ); ?>"
 				       placeholder="<?php echo esc_attr( $summary['avg_sentence_length'] ); ?>"
 				       min="5" max="50">
+				<?php /* translators: %s is a count/number */ ?>
 				<span class="sfba-field-hint"><?php printf( esc_html__( 'Detected avg: %d words', 'super-fast-blog-ai' ), (int) $summary['avg_sentence_length'] ); ?></span>
 			</div>
 		</div>

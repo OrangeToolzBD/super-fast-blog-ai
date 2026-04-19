@@ -7,6 +7,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $month_name = gmdate( 'F Y', mktime( 0, 0, 0, $month, 1, $year ) );
 $prev_month = $month === 1 ? 12 : $month - 1;

@@ -19,6 +19,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. Remove the vendor/ directory first.
 //
@@ -29,12 +31,15 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // Pre-deleting vendor/ here (using PHP's own filesystem functions which
 // handle long paths better via the \\?\ prefix trick) removes those
 // problematic paths before WordPress tries to delete the plugin directory.
+//
+// Note: WP_Filesystem is not available/initialized during uninstall.php,
+// so native PHP filesystem functions are required here.
 // ─────────────────────────────────────────────────────────────────────────────
 
-$vendor_dir = __DIR__ . DIRECTORY_SEPARATOR . 'vendor';
+$sfba_vendor_dir = __DIR__ . DIRECTORY_SEPARATOR . 'vendor';
 
-if ( is_dir( $vendor_dir ) ) {
-	sfba_uninstall_rmdir_recursive( $vendor_dir );
+if ( is_dir( $sfba_vendor_dir ) ) {
+	sfba_uninstall_rmdir_recursive( $sfba_vendor_dir );
 }
 
 /**
@@ -43,6 +48,9 @@ if ( is_dir( $vendor_dir ) ) {
  * Uses the \\?\-prefixed absolute path on Windows to bypass the MAX_PATH
  * 260-character limit that can cause rmdir/unlink to fail on deeply-nested
  * vendor paths.
+ *
+ * WP_Filesystem is not available during uninstall.php execution, so native
+ * PHP filesystem calls are intentionally used here.
  *
  * @param string $dir Absolute path to the directory to remove.
  */
@@ -58,7 +66,7 @@ function sfba_uninstall_rmdir_recursive( string $dir ): void {
 		return;
 	}
 
-	$items = @scandir( $long_dir );
+	$items = @scandir( $long_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( ! $items ) {
 		return;
 	}
@@ -74,13 +82,13 @@ function sfba_uninstall_rmdir_recursive( string $dir ): void {
 			sfba_uninstall_rmdir_recursive( $path );
 		} else {
 			// Make writable in case the file is read-only (common in vendor/).
-			@chmod( $path, 0755 );
-			@unlink( $path );
+			@chmod( $path, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
+			@unlink( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink, WordPress.PHP.NoSilencedErrors.Discouraged
 		}
 	}
 
-	@chmod( $long_dir, 0755 );
-	@rmdir( $long_dir );
+	@chmod( $long_dir, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
+	@rmdir( $long_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.PHP.NoSilencedErrors.Discouraged
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,11 +100,11 @@ function sfba_uninstall_rmdir_recursive( string $dir ): void {
 
 global $wpdb;
 
-$settings = get_option( 'sfba_settings', [] );
-$delete_data = ! empty( $settings['general']['delete_data_on_uninstall'] );
+$sfba_settings    = get_option( 'sfba_settings', [] );
+$sfba_delete_data = ! empty( $sfba_settings['general']['delete_data_on_uninstall'] );
 
-if ( $delete_data ) {
-	$tables = [
+if ( $sfba_delete_data ) {
+	$sfba_tables = [
 		// New v2 tables (sfba_ prefix)
 		"{$wpdb->prefix}sfba_brand_voice",
 		"{$wpdb->prefix}sfba_generations",
@@ -110,9 +118,9 @@ if ( $delete_data ) {
 		"{$wpdb->prefix}slf_generated_title",
 	];
 
-	foreach ( $tables as $table ) {
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+	foreach ( $sfba_tables as $sfba_table ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$wpdb->query( "DROP TABLE IF EXISTS `{$sfba_table}`" );
 	}
 
 	// ── Remove all plugin options ──────────────────────────────────────────
@@ -124,7 +132,7 @@ if ( $delete_data ) {
 	delete_option( 'otslf_ai_blog_db_version' );
 
 	// ── Remove all plugin transients ───────────────────────────────────────
-	$transients = [
+	$sfba_transients = [
 		'sfba_openai_models',
 		'sfba_anthropic_models',
 		'sfba_google_models',
@@ -136,15 +144,17 @@ if ( $delete_data ) {
 		'sfba_budget_alert',
 	];
 
-	foreach ( $transients as $key ) {
-		delete_transient( $key );
+	foreach ( $sfba_transients as $sfba_key ) {
+		delete_transient( $sfba_key );
 	}
 
 	// Also sweep for any sfba_ transients stored with timeout records.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$wpdb->query(
 		"DELETE FROM {$wpdb->options}
 		 WHERE option_name LIKE '_transient_sfba_%'
 		    OR option_name LIKE '_transient_timeout_sfba_%'"
 	);
 }
+
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound

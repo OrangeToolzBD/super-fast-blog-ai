@@ -13,6 +13,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $modules = [
 	[
@@ -171,13 +172,13 @@ $stats = [
 
 			<!-- Icon tile -->
 			<div style="width:48px;height:48px;flex-shrink:0;background:<?php echo esc_attr( $st['icon_bg'] ); ?>;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">
-				<?php echo $st['icon']; ?>
+				<?php echo esc_html( $st['icon'] ); ?>
 			</div>
 
 			<!-- Text -->
 			<div>
 				<div style="font-size:22px;font-weight:700;line-height:1.15;color:<?php echo $muted ? '#9ca3af' : '#f97316'; ?>;">
-					<?php echo $st['value']; ?>
+					<?php echo wp_kses_post( $st['value'] ); ?>
 				</div>
 				<div style="font-size:12px;color:#9ca3af;margin-top:3px;">
 					<?php echo esc_html( $st['label'] ); ?>
@@ -200,7 +201,7 @@ $stats = [
 		   onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.borderColor='#e5e7eb';this.style.transform='translateY(0)';">
 			<!-- Icon tile -->
 			<div style="width:42px;height:42px;flex-shrink:0;border-radius:11px;background:<?php echo esc_attr( $m['bg'] ); ?>;display:flex;align-items:center;justify-content:center;font-size:20px;">
-				<?php echo $m['icon']; ?>
+				<?php echo esc_html( $m['icon'] ); ?>
 			</div>
 			<!-- Text -->
 			<div style="flex:1;min-width:0;">

@@ -12,6 +12,7 @@
  * @package SuperFastBlogAI
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $content  = $settings['content']        ?? [];
 $seo      = $settings['seo']            ?? [];
@@ -127,9 +128,9 @@ $provider_icons = [
 					     width="24" height="24"
 					     style="object-fit:contain;display:block;"
 					     onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
-					<span style="display:none;font-size:22px;"><?php echo $icon; ?></span>
+					<span style="display:none;font-size:22px;"><?php echo esc_html( $icon ); ?></span>
 					<?php else : ?>
-					<span style="font-size:22px;"><?php echo $icon; ?></span>
+					<span style="font-size:22px;"><?php echo esc_html( $icon ); ?></span>
 					<?php endif; ?>
 				</div>
 				<div>

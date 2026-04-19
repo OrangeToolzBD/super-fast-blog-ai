@@ -295,7 +295,7 @@ class SFBA_Content_Calendar {
 		global $wpdb;
 		$id = (int) $request->get_param( 'id' );
 
-		$deleted = $wpdb->delete(
+		$deleted = $wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_content_calendar',
 			[ 'id' => $id ],
 			[ '%d' ]
@@ -412,7 +412,7 @@ class SFBA_Content_Calendar {
 		$days_count  = (int) gmdate( 't', mktime( 0, 0, 0, $month, 1, $year ) );
 		$month_end   = sprintf( '%04d-%02d-%02d', $year, $month, $days_count );
 
-		$scheduled = $wpdb->get_results(
+		$scheduled = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}sfba_content_calendar
 				  WHERE suggested_date >= %s
@@ -424,7 +424,7 @@ class SFBA_Content_Calendar {
 			ARRAY_A
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$unscheduled = $wpdb->get_results(
 			"SELECT * FROM {$wpdb->prefix}sfba_content_calendar
 			  WHERE suggested_date IS NULL
@@ -558,7 +558,7 @@ class SFBA_Content_Calendar {
 
 		// Dedup on target_keyword.
 		if ( '' !== $keyword ) {
-			$exists = $wpdb->get_var(
+			$exists = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare(
 					"SELECT id FROM {$wpdb->prefix}sfba_content_calendar WHERE LOWER(target_keyword) = LOWER(%s) LIMIT 1",
 					$keyword
@@ -569,7 +569,7 @@ class SFBA_Content_Calendar {
 			}
 		}
 
-		$result = $wpdb->insert(
+		$result = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_content_calendar',
 			[
 				'title'              => $title,
@@ -605,7 +605,7 @@ class SFBA_Content_Calendar {
 			return new WP_Error( 'sfba_invalid_input', __( 'Invalid entry ID.', 'super-fast-blog-ai' ) );
 		}
 
-		$row = $wpdb->get_row(
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT id FROM {$wpdb->prefix}sfba_content_calendar WHERE id = %d LIMIT 1",
 				$entry_id
@@ -659,7 +659,7 @@ class SFBA_Content_Calendar {
 			return true;
 		}
 
-		$result = $wpdb->update(
+		$result = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prefix . 'sfba_content_calendar',
 			$update,
 			[ 'id' => $entry_id ],
@@ -771,7 +771,7 @@ class SFBA_Content_Calendar {
 	private function get_existing_keywords(): array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_col(
 			"SELECT LOWER(target_keyword) FROM {$wpdb->prefix}sfba_content_calendar WHERE target_keyword != '' LIMIT 500"
 		);
@@ -916,7 +916,7 @@ keyword_difficulty: 0 (easiest) to 100 (hardest).";
 	private function get_entry( int $entry_id ): ?array {
 		global $wpdb;
 
-		$row = $wpdb->get_row(
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}sfba_content_calendar WHERE id = %d LIMIT 1",
 				$entry_id

@@ -1,8 +1,8 @@
-=== Super Fast Blog AI – AI Content Generator, Repurposer & SEO Writer for WordPress ===
+=== Super Fast Blog AI – AI Content Generator, Repurposer & SEO Writer ===
 Contributors: waatechdigital, khan9, ikefti
-Tags: ai writer, chatgpt, claude, gemini, content generator, seo content, repurpose, blog ai
-Requires at least: 5.9
-Tested up to: 6.8.1
+Tags: ai writer, content generator, seo content, repurpose, blog ai
+Requires at least: 6.3
+Tested up to: 6.9
 Stable tag: 2.0.0
 Requires PHP: 8.1
 License: GPLv2 or later
