@@ -119,7 +119,7 @@ class SFBA_Seo_Scorer {
 	private const AI_PASSIVE_RATIO   = 0.35;
 
 	/** @var SFBA_Core */
-	private SFBA_Core $core;
+	private $core;
 
 	/**
 	 * @param SFBA_Core $core
@@ -255,7 +255,7 @@ class SFBA_Seo_Scorer {
 	 * @param array  $meta     { meta_title, meta_description, site_url }
 	 * @return array|WP_Error
 	 */
-	public function score_content( string $content, string $keyword = '', array $meta = [] ): array|WP_Error {
+	public function score_content( string $content, string $keyword = '', array $meta = [] ) {
 		if ( '' === trim( $content ) ) {
 			return new WP_Error( 'sfba_invalid_input', __( 'Content cannot be empty.', 'super-fast-blog-ai' ) );
 		}
@@ -308,7 +308,7 @@ class SFBA_Seo_Scorer {
 	 * @param string $content HTML or plain-text content.
 	 * @return array|WP_Error
 	 */
-	public function detect_ai_patterns( string $content ): array|WP_Error {
+	public function detect_ai_patterns( string $content ) {
 		if ( '' === trim( $content ) ) {
 			return new WP_Error( 'sfba_invalid_input', __( 'Content cannot be empty.', 'super-fast-blog-ai' ) );
 		}
@@ -339,8 +339,8 @@ class SFBA_Seo_Scorer {
 
 		// Signal 2: Sentence length uniformity (coefficient of variation).
 		$sent_lengths = array_map(
-			fn( $s ) => str_word_count( $s ),
-			array_filter( $sentences, fn( $s ) => str_word_count( $s ) > 0 )
+			function( $s ) { return str_word_count( $s ); },
+			array_filter( $sentences, function( $s ) { return str_word_count( $s ) > 0; } )
 		);
 		$cv                   = $this->coefficient_of_variation( array_values( $sent_lengths ) );
 		$uniformity_triggered = count( $sent_lengths ) >= 5 && $cv < self::AI_SENTENCE_CV_MAX;
@@ -374,12 +374,15 @@ class SFBA_Seo_Scorer {
 		// Combine into overall likelihood.
 		$likelihood = max( 0, min( 100, $phrase_score + $uniformity_score + $passive_score + $transition_score ) );
 
-		$label = match ( true ) {
-			$likelihood >= 70 => __( 'Likely AI-generated',   'super-fast-blog-ai' ),
-			$likelihood >= 40 => __( 'Possibly AI-assisted',  'super-fast-blog-ai' ),
-			$likelihood >= 20 => __( 'Minimal AI indicators', 'super-fast-blog-ai' ),
-			default           => __( 'Appears human-written', 'super-fast-blog-ai' ),
-		};
+		if ( $likelihood >= 70 ) {
+			$label = __( 'Likely AI-generated',   'super-fast-blog-ai' );
+		} elseif ( $likelihood >= 40 ) {
+			$label = __( 'Possibly AI-assisted',  'super-fast-blog-ai' );
+		} elseif ( $likelihood >= 20 ) {
+			$label = __( 'Minimal AI indicators', 'super-fast-blog-ai' );
+		} else {
+			$label = __( 'Appears human-written', 'super-fast-blog-ai' );
+		}
 
 		$signals = [
 			[
@@ -464,11 +467,11 @@ class SFBA_Seo_Scorer {
 		$meta_title = mb_strtolower( (string) ( $meta['meta_title'] ?? '' ) );
 		$h1_text    = mb_strtolower( implode( ' ', $parsed['h1s'] ) );
 		$combined   = $meta_title . ' ' . $h1_text;
-		$found      = str_contains( $combined, $keyword );
+		$found      = ( false !== strpos( $combined, $keyword ) );
 
 		if ( $found ) {
-			$at_start = str_starts_with( trim( $meta_title ), $keyword )
-				|| str_starts_with( trim( $h1_text ), $keyword );
+			$at_start = ( 0 === strpos( trim( $meta_title ), $keyword ) )
+				|| ( 0 === strpos( trim( $h1_text ), $keyword ) );
 
 			return $this->pass_check(
 				$id,
@@ -501,7 +504,7 @@ class SFBA_Seo_Scorer {
 
 		$intro_words = array_slice( $parsed['words'], 0, 100 );
 		$intro_text  = mb_strtolower( implode( ' ', $intro_words ) );
-		$found       = str_contains( $intro_text, $keyword );
+		$found       = ( false !== strpos( $intro_text, $keyword ) );
 
 		if ( $found ) {
 			return $this->pass_check(
@@ -611,7 +614,7 @@ class SFBA_Seo_Scorer {
 			return $this->skip_check( $id, __( 'Paragraph length', 'super-fast-blog-ai' ), $max, __( 'No paragraphs detected.', 'super-fast-blog-ai' ) );
 		}
 
-		$lengths  = array_map( fn( $p ) => str_word_count( $p ), $paras );
+		$lengths  = array_map( function( $p ) { return str_word_count( $p ); }, $paras );
 		$avg      = (int) round( array_sum( $lengths ) / count( $lengths ) );
 		$max_para = max( $lengths );
 		$value    = "avg:{$avg} words, max:{$max_para} words";
@@ -685,7 +688,7 @@ class SFBA_Seo_Scorer {
 			return $this->fail_check( $id, __( 'Meta description', 'super-fast-blog-ai' ), $max, '(missing)', __( 'Write a meta description (50–160 characters) to improve click-through rates.', 'super-fast-blog-ai' ) );
 		}
 
-		$has_kw = '' !== $keyword && str_contains( mb_strtolower( $desc ), $keyword );
+		$has_kw = '' !== $keyword && ( false !== strpos( mb_strtolower( $desc ), $keyword ) );
 		$value  = "{$len} chars" . ( $has_kw ? ', keyword ✓' : ', keyword ✗' );
 
 		if ( $len < 50 || $len > 160 ) {
@@ -745,8 +748,8 @@ class SFBA_Seo_Scorer {
 
 		preg_match_all( '/<p[^>]*>(.*?)<\/p>/is', $content, $p_matches );
 		$paragraphs = array_filter(
-			array_map( fn( $p ) => trim( wp_strip_all_tags( $p ) ), $p_matches[1] ?? [] ),
-			fn( $p ) => '' !== $p
+			array_map( function( $p ) { return trim( wp_strip_all_tags( $p ) ); }, $p_matches[1] ?? [] ),
+			function( $p ) { return '' !== $p; }
 		);
 
 		preg_match_all( '/<img[^>]+>/i', $content, $img_matches );
@@ -776,11 +779,11 @@ class SFBA_Seo_Scorer {
 	// Check result factories.
 	// -------------------------------------------------------------------------
 
-	private function pass_check( string $id, string $label, int $max, int $points, mixed $value, string $message ): array {
+	private function pass_check( string $id, string $label, int $max, int $points, $value, string $message ): array {
 		return [ 'id' => $id, 'label' => $label, 'status' => 'pass', 'points_earned' => min( $points, $max ), 'points_max' => $max, 'value' => $value, 'message' => $message ];
 	}
 
-	private function warn_check( string $id, string $label, int $max, int $points, mixed $value, string $message ): array {
+	private function warn_check( string $id, string $label, int $max, int $points, $value, string $message ): array {
 		return [ 'id' => $id, 'label' => $label, 'status' => 'warn', 'points_earned' => max( 0, min( $points, $max ) ), 'points_max' => $max, 'value' => $value, 'message' => $message ];
 	}
 

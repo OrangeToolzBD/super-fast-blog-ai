@@ -197,7 +197,7 @@ class SFBA_Cost_Tracker {
 	// -------------------------------------------------------------------------
 
 	/** @var SFBA_Core */
-	private SFBA_Core $core;
+	private $core;
 
 	// -------------------------------------------------------------------------
 	// Constructor.
@@ -217,7 +217,7 @@ class SFBA_Cost_Tracker {
 	/**
 	 * @param SFBA_Loader $loader
 	 */
-	public function init( SFBA_Loader $loader ): void {
+	public function init( SFBA_Loader $loader ) {
 		// Monthly cron: prune old logs.
 		$loader->add_action( 'sfba_prune_generation_log', $this, 'prune_old_logs' );
 
@@ -294,7 +294,7 @@ class SFBA_Cost_Tracker {
 	/**
 	 * Register the Cost Tracker submenu page under Super Fast Blog AI.
 	 */
-	public function register_admin_menu(): void {
+	public function register_admin_menu() {
 		add_submenu_page(
 			'super-fast-blog-ai',
 			__( 'Cost Tracker — Super Fast Blog AI', 'super-fast-blog-ai' ),
@@ -308,7 +308,7 @@ class SFBA_Cost_Tracker {
 	/**
 	 * Render the Cost Tracker admin page.
 	 */
-	public function render_cost_page(): void {
+	public function render_cost_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'super-fast-blog-ai' ) );
 		}
@@ -347,14 +347,14 @@ class SFBA_Cost_Tracker {
 	// -------------------------------------------------------------------------
 
 	/** GET /costs/summary */
-	public function rest_summary( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_summary( WP_REST_Request $request ) {
 		$from   = (string) $request->get_param( 'from' );
 		$to     = (string) $request->get_param( 'to' );
 		return SFBA_Rest_Api::success( $this->get_monthly_summary( $from, $to ) );
 	}
 
 	/** GET /costs/breakdown */
-	public function rest_breakdown( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_breakdown( WP_REST_Request $request ) {
 		$from = (string) $request->get_param( 'from' );
 		$to   = (string) $request->get_param( 'to' );
 
@@ -367,17 +367,17 @@ class SFBA_Cost_Tracker {
 	}
 
 	/** GET /costs/optimizations */
-	public function rest_optimizations( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_optimizations( WP_REST_Request $request ) {
 		return SFBA_Rest_Api::success( $this->suggest_cost_optimizations() );
 	}
 
 	/** GET /costs/budget */
-	public function rest_budget( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_budget( WP_REST_Request $request ) {
 		return SFBA_Rest_Api::success( $this->check_budget_alert() );
 	}
 
 	/** GET /costs/log */
-	public function rest_log( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_log( WP_REST_Request $request ) {
 		global $wpdb;
 
 		$per_page = absint( $request->get_param( 'per_page' ) ) ?: 25;
@@ -425,7 +425,7 @@ class SFBA_Cost_Tracker {
 	}
 
 	/** POST /costs/prune */
-	public function rest_prune( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_prune( WP_REST_Request $request ) {
 		global $wpdb;
 
 		$cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-90 days' ) );
@@ -468,7 +468,7 @@ class SFBA_Cost_Tracker {
 	 * } $data Generation metadata. 'feature' is MANDATORY.
 	 * @return int|false Inserted row ID, or false on failure.
 	 */
-	public function log( array $data ): int|false {
+	public function log( array $data ) {
 		global $wpdb;
 
 		$provider          = sanitize_key( $data['provider'] ?? '' );
@@ -516,13 +516,13 @@ class SFBA_Cost_Tracker {
 	 * @param int    $completion_tokens Output token count.
 	 * @return float Cost in USD, rounded to 6 decimal places.
 	 */
-	public function calculate_cost( string $provider, string $model, int $prompt_tokens, int $completion_tokens ): float {
+	public function calculate_cost( string $provider, string $model, int $prompt_tokens, int $completion_tokens ) {
 		$rates = self::PRICING[ $provider ][ $model ] ?? null;
 
 		// Try a prefix match for versioned model IDs (e.g. gpt-4o-2024-08-06).
 		if ( null === $rates && isset( self::PRICING[ $provider ] ) ) {
 			foreach ( self::PRICING[ $provider ] as $known_model => $known_rates ) {
-				if ( str_starts_with( $model, $known_model ) || str_starts_with( $known_model, $model ) ) {
+				if ( ( 0 === strpos( $model, $known_model ) ) || ( 0 === strpos( $known_model, $model ) ) ) {
 					$rates = $known_rates;
 					break;
 				}
@@ -533,8 +533,8 @@ class SFBA_Cost_Tracker {
 			return 0.0;
 		}
 
-		$cost = ( $prompt_tokens / 1_000_000 ) * $rates['input']
-			  + ( $completion_tokens / 1_000_000 ) * $rates['output'];
+		$cost = ( $prompt_tokens / 1000000 ) * $rates['input']
+			  + ( $completion_tokens / 1000000 ) * $rates['output'];
 
 		return round( $cost, 6 );
 	}
@@ -558,7 +558,7 @@ class SFBA_Cost_Tracker {
 	 *     budget_alert: array
 	 * }
 	 */
-	public function get_monthly_summary( string $from = '', string $to = '' ): array {
+	public function get_monthly_summary( string $from = '', string $to = '' ) {
 		$range = $this->resolve_date_range( $from, $to );
 		$base  = $this->get_summary( $range['from'], $range['to'] );
 
@@ -594,7 +594,7 @@ class SFBA_Cost_Tracker {
 	 *     estimated_savings_usd: float
 	 * }>
 	 */
-	public function suggest_cost_optimizations(): array {
+	public function suggest_cost_optimizations() {
 		$usage = $this->get_model_usage_this_month();
 
 		if ( empty( $usage ) ) {
@@ -644,7 +644,7 @@ class SFBA_Cost_Tracker {
 			];
 		}
 
-		usort( $suggestions, fn( $a, $b ) => $b['estimated_savings_usd'] <=> $a['estimated_savings_usd'] );
+		usort( $suggestions, function( $a, $b ) { return $b['estimated_savings_usd'] <=> $a['estimated_savings_usd']; } );
 
 		return $suggestions;
 	}
@@ -664,7 +664,7 @@ class SFBA_Cost_Tracker {
 	 * @param float|null $current_spend_usd Pre-computed spend (avoids a second DB query).
 	 * @return array{status: string, budget_usd: float, spent_usd: float, remaining_usd: float, percent_used: int, message: string}
 	 */
-	public function check_budget_alert( ?float $current_spend_usd = null ): array {
+	public function check_budget_alert( $current_spend_usd = null ) {
 		$budget_usd = (float) $this->core->settings->get( 'monthly_budget_usd', 0.0 );
 
 		if ( $budget_usd <= 0.0 ) {
@@ -737,10 +737,12 @@ class SFBA_Cost_Tracker {
 	 * @param string $to   YYYY-MM-DD (default: today).
 	 * @return array{total_cost_usd: float, total_generations: int, avg_cost_per_generation: float, total_tokens: int, prompt_tokens: int, completion_tokens: int, avg_generation_time_ms: int}
 	 */
-	public function get_summary( string $from = '', string $to = '' ): array {
+	public function get_summary( string $from = '', string $to = '' ) {
 		global $wpdb;
 
-		[ 'from' => $from, 'to' => $to ] = $this->resolve_date_range( $from, $to );
+		$range = $this->resolve_date_range( $from, $to );
+		$from  = $range['from'];
+		$to    = $range['to'];
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$row = $wpdb->get_row(
@@ -782,7 +784,7 @@ class SFBA_Cost_Tracker {
 	 *
 	 * @return array<string, array{cost_usd: float, generations: int, tokens: int, avg_cost: float}>
 	 */
-	public function get_by_provider( string $from = '', string $to = '' ): array {
+	public function get_by_provider( string $from = '', string $to = '' ) {
 		return $this->aggregate_by( 'provider', $from, $to );
 	}
 
@@ -791,7 +793,7 @@ class SFBA_Cost_Tracker {
 	 *
 	 * @return array<string, array{cost_usd: float, generations: int, tokens: int, avg_cost: float}>
 	 */
-	public function get_by_model( string $from = '', string $to = '' ): array {
+	public function get_by_model( string $from = '', string $to = '' ) {
 		return $this->aggregate_by( 'model', $from, $to );
 	}
 
@@ -803,7 +805,7 @@ class SFBA_Cost_Tracker {
 	 *
 	 * @return array<string, array{cost_usd: float, generations: int, tokens: int, avg_cost: float}>
 	 */
-	public function get_by_feature( string $from = '', string $to = '' ): array {
+	public function get_by_feature( string $from = '', string $to = '' ) {
 		return $this->aggregate_by( 'feature', $from, $to );
 	}
 
@@ -815,7 +817,7 @@ class SFBA_Cost_Tracker {
 	 * @param int $days Rows older than this many days are deleted.
 	 * @return int|WP_Error Rows deleted, or WP_Error.
 	 */
-	public function prune_old_logs( int $days = self::DEFAULT_RETENTION_DAYS ): int|WP_Error {
+	public function prune_old_logs( int $days = self::DEFAULT_RETENTION_DAYS ) {
 		global $wpdb;
 
 		$deleted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -841,7 +843,7 @@ class SFBA_Cost_Tracker {
 	 * @param string $column Column to group by ('provider', 'model', 'feature').
 	 * @return array<string, array{cost_usd: float, generations: int, tokens: int, avg_cost: float}>
 	 */
-	private function aggregate_by( string $column, string $from, string $to ): array {
+	private function aggregate_by( string $column, string $from, string $to ) {
 		global $wpdb;
 
 		$allowed = [ 'provider', 'model', 'feature' ];
@@ -849,7 +851,9 @@ class SFBA_Cost_Tracker {
 			return [];
 		}
 
-		[ 'from' => $from, 'to' => $to ] = $this->resolve_date_range( $from, $to );
+		$range = $this->resolve_date_range( $from, $to );
+		$from  = $range['from'];
+		$to    = $range['to'];
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows = $wpdb->get_results(
@@ -894,7 +898,7 @@ class SFBA_Cost_Tracker {
 	 *
 	 * Used by suggest_cost_optimizations() to find what's actually running.
 	 */
-	private function get_model_usage_this_month(): array {
+	private function get_model_usage_this_month() {
 		global $wpdb;
 
 		$range = $this->resolve_date_range( '', '' );
@@ -943,7 +947,7 @@ class SFBA_Cost_Tracker {
 	 *
 	 * @return array{from: string, to: string}
 	 */
-	private function resolve_date_range( string $from, string $to ): array {
+	private function resolve_date_range( string $from, string $to ) {
 		$default_from = gmdate( 'Y-m-01' );
 		$default_to   = gmdate( 'Y-m-d' );
 

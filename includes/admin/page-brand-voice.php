@@ -20,7 +20,7 @@ $has_profile = ! empty( $summary );
 $overrides   = $has_profile ? ( $summary['overrides'] ?? [] ) : [];
 $post_count  = (int) $this->core->settings->get( 'brand_voice.post_count', 30 );
 ?>
-<div class="wrap sfba-admin-wrap" style="max-width:1060px;">
+<div class="wrap sfba-admin-wrap">
 
 	<!-- Hero -->
 	<div class="sfba-dash-hero" style="margin-bottom:24px;">

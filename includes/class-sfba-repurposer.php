@@ -64,7 +64,7 @@ class SFBA_Repurposer {
 	private const INSTAGRAM_HASHTAGS  = 30;
 
 	/** @var SFBA_Core */
-	private SFBA_Core $core;
+	private $core;
 
 	/**
 	 * Hashtag language preference for the current request.
@@ -72,7 +72,7 @@ class SFBA_Repurposer {
 	 *
 	 * @var string
 	 */
-	private string $hashtag_lang = 'english';
+	private $hashtag_lang = 'english';
 
 	/**
 	 * Detected language of the source content (e.g. "English", "Bengali").
@@ -80,7 +80,7 @@ class SFBA_Repurposer {
 	 *
 	 * @var string
 	 */
-	private string $content_language = 'English';
+	private $content_language = 'English';
 
 	/**
 	 * @param SFBA_Core $core
@@ -166,7 +166,7 @@ class SFBA_Repurposer {
 			'order'          => 'DESC',
 		] );
 		$providers    = $this->core->providers->get_all_providers();
-		$connected    = count( array_filter( $providers, fn( $p ) => $p['has_key'] ) );
+		$connected    = count( array_filter( $providers, function( $p ) { return $p['has_key']; } ) );
 
 		include SFBA_PLUGIN_DIR . 'includes/admin/page-repurpose.php';
 	}
@@ -242,7 +242,7 @@ class SFBA_Repurposer {
 	 * @param string   $content   Pasted content; used when $post_id is 0.
 	 * @return array|WP_Error
 	 */
-	public function repurpose( int $post_id, array $platforms = [], string $content = '' ): array|WP_Error {
+	public function repurpose( int $post_id, array $platforms = [], string $content = '' ) {
 		if ( $post_id > 0 ) {
 			$post = get_post( $post_id );
 			if ( ! $post instanceof WP_Post ) {
@@ -266,7 +266,7 @@ class SFBA_Repurposer {
 		} else {
 			$platforms = array_values( array_filter(
 				$platforms,
-				fn( $p ) => array_key_exists( $p, self::PLATFORMS )
+				function( $p ) { return array_key_exists( $p, self::PLATFORMS ); }
 			) );
 		}
 
@@ -298,7 +298,7 @@ class SFBA_Repurposer {
 	 * @param int      $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_twitter_thread( string $content, array $key_points = [], string $url = '', int $post_id = 0 ): array|WP_Error {
+	public function generate_twitter_thread( string $content, array $key_points = [], string $url = '', int $post_id = 0 ) {
 		$prompt = $this->prompt_twitter( $content, $key_points, $url );
 		$gen    = $this->call_ai( $prompt, 'social', 800, 0.8, $post_id, 'repurpose_twitter' );
 
@@ -317,7 +317,7 @@ class SFBA_Repurposer {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_email_newsletter( string $content, string $url = '', int $post_id = 0 ): array|WP_Error {
+	public function generate_email_newsletter( string $content, string $url = '', int $post_id = 0 ) {
 		$prompt = $this->prompt_email( $content, $url );
 		$gen    = $this->call_ai( $prompt, 'email', 600, 0.7, $post_id, 'repurpose_email' );
 
@@ -335,7 +335,7 @@ class SFBA_Repurposer {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_linkedin_post( string $content, int $post_id = 0 ): array|WP_Error {
+	public function generate_linkedin_post( string $content, int $post_id = 0 ) {
 		$prompt = $this->prompt_linkedin( $content );
 		$gen    = $this->call_ai( $prompt, 'social', 500, 0.75, $post_id, 'repurpose_linkedin' );
 
@@ -354,7 +354,7 @@ class SFBA_Repurposer {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_facebook_post( string $content, string $url = '', int $post_id = 0 ): array|WP_Error {
+	public function generate_facebook_post( string $content, string $url = '', int $post_id = 0 ) {
 		$prompt = $this->prompt_facebook( $content, $url );
 		$gen    = $this->call_ai( $prompt, 'social', 400, 0.8, $post_id, 'repurpose_facebook' );
 
@@ -372,7 +372,7 @@ class SFBA_Repurposer {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_instagram_caption( string $content, int $post_id = 0 ): array|WP_Error {
+	public function generate_instagram_caption( string $content, int $post_id = 0 ) {
 		$prompt = $this->prompt_instagram( $content );
 		$gen    = $this->call_ai( $prompt, 'social', 400, 0.85, $post_id, 'repurpose_instagram' );
 
@@ -392,7 +392,7 @@ class SFBA_Repurposer {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	public function generate_youtube_outline( string $content, string $post_title = '', string $url = '', int $post_id = 0 ): array|WP_Error {
+	public function generate_youtube_outline( string $content, string $post_title = '', string $url = '', int $post_id = 0 ) {
 		$prompt = $this->prompt_youtube( $content, $post_title, $url );
 		$gen    = $this->call_ai( $prompt, 'social', 700, 0.7, $post_id, 'repurpose_youtube' );
 
@@ -411,11 +411,12 @@ class SFBA_Repurposer {
 	 * Return a hashtag language instruction sentence based on the current preference.
 	 */
 	private function hashtag_lang_instruction(): string {
-		return match ( $this->hashtag_lang ) {
-			'source' => "Hashtags must be written in {$this->content_language} (NOT in English).",
-			'both'   => "Include hashtags in BOTH English AND {$this->content_language} (mix them).",
-			default  => 'Hashtags must be in English.',
-		};
+		if ( 'source' === $this->hashtag_lang ) {
+			return "Hashtags must be written in {$this->content_language} (NOT in English).";
+		} elseif ( 'both' === $this->hashtag_lang ) {
+			return "Include hashtags in BOTH English AND {$this->content_language} (mix them).";
+		}
+		return 'Hashtags must be in English.';
 	}
 
 	/**
@@ -731,7 +732,7 @@ class SFBA_Repurposer {
 		$last_line = trim( end( $lines ) );
 		$hashtags  = [];
 
-		if ( str_contains( $last_line, '#' ) ) {
+		if ( ( false !== strpos( $last_line, '#' ) ) ) {
 			preg_match_all( '/#([\w]+)/u', $last_line, $matches );
 			$hashtags = $matches[1] ?? [];
 			array_pop( $lines );
@@ -767,7 +768,7 @@ class SFBA_Repurposer {
 		while ( $last_idx >= 0 && '' === trim( $lines[ $last_idx ] ) ) {
 			$last_idx--;
 		}
-		if ( $last_idx >= 0 && str_contains( $lines[ $last_idx ], '#' ) ) {
+		if ( $last_idx >= 0 && ( false !== strpos( $lines[ $last_idx ], '#' ) ) ) {
 			preg_match_all( '/#([\w]+)/u', $lines[ $last_idx ], $matches );
 			$hashtags = $matches[1] ?? [];
 			unset( $lines[ $last_idx ] );
@@ -801,7 +802,7 @@ class SFBA_Repurposer {
 		if ( is_array( $json ) && isset( $json['caption'] ) ) {
 			$caption  = sanitize_textarea_field( $json['caption'] );
 			$hashtags = array_map(
-				fn( $h ) => ltrim( sanitize_text_field( $h ), '#' ),
+				function( $h ) { return ltrim( sanitize_text_field( $h ), '#' ); },
 				(array) ( $json['hashtags'] ?? [] )
 			);
 		} else {
@@ -960,7 +961,7 @@ class SFBA_Repurposer {
 	 * @param string $feature       Cost tracker feature tag.
 	 * @return array|WP_Error
 	 */
-	private function call_ai( string $prompt, string $content_type, int $max_tokens, float $temperature, int $post_id, string $feature ): array|WP_Error {
+	private function call_ai( string $prompt, string $content_type, int $max_tokens, float $temperature, int $post_id, string $feature ) {
 		$route = $this->core->providers->resolve_route( $content_type );
 
 		// No provider → return mock.
@@ -1060,19 +1061,24 @@ class SFBA_Repurposer {
 	 * @param WP_Post|null $post  Null when repurposing pasted content (no post).
 	 * @return array|WP_Error
 	 */
-	private function generate_platform( string $platform, array $source, ?WP_Post $post ): array|WP_Error {
+	private function generate_platform( string $platform, array $source, ?WP_Post $post ) {
 		$post_id = $post instanceof WP_Post ? $post->ID : 0;
 
-		return match ( $platform ) {
-			'twitter'   => $this->generate_twitter_thread( $source['plain'], $source['key_points'], $source['url'], $post_id ),
-			'linkedin'  => $this->generate_linkedin_post( $source['plain'], $post_id ),
-			'email'     => $this->generate_email_newsletter( $source['plain'], $source['url'], $post_id ),
-			'facebook'  => $this->generate_facebook_post( $source['plain'], $source['url'], $post_id ),
-			'instagram' => $this->generate_instagram_caption( $source['plain'], $post_id ),
-			'youtube'   => $this->generate_youtube_outline( $source['plain'], $source['title'], $source['url'], $post_id ),
-			/* translators: %s is replaced with the platform name */
-			default     => new WP_Error( 'sfba_invalid_platform', sprintf( __( 'Unknown platform: %s', 'super-fast-blog-ai' ), $platform ) ),
-		};
+		if ( 'twitter' === $platform ) {
+			return $this->generate_twitter_thread( $source['plain'], $source['key_points'], $source['url'], $post_id );
+		} elseif ( 'linkedin' === $platform ) {
+			return $this->generate_linkedin_post( $source['plain'], $post_id );
+		} elseif ( 'email' === $platform ) {
+			return $this->generate_email_newsletter( $source['plain'], $source['url'], $post_id );
+		} elseif ( 'facebook' === $platform ) {
+			return $this->generate_facebook_post( $source['plain'], $source['url'], $post_id );
+		} elseif ( 'instagram' === $platform ) {
+			return $this->generate_instagram_caption( $source['plain'], $post_id );
+		} elseif ( 'youtube' === $platform ) {
+			return $this->generate_youtube_outline( $source['plain'], $source['title'], $source['url'], $post_id );
+		}
+		/* translators: %s is replaced with the platform name */
+		return new WP_Error( 'sfba_invalid_platform', sprintf( __( 'Unknown platform: %s', 'super-fast-blog-ai' ), $platform ) );
 	}
 
 	/**
@@ -1207,7 +1213,7 @@ class SFBA_Repurposer {
 		// Fallback: one tweet per line (numbered list).
 		$lines = array_filter(
 			array_map( 'trim', explode( "\n", $text ) ),
-			fn( $l ) => '' !== $l
+			function( $l ) { return '' !== $l; }
 		);
 
 		$items = [];

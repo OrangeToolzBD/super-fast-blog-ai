@@ -24,7 +24,7 @@ $status_cfg = [
 	'published'   => [ 'label' => 'Published',    'bg' => '#f0fdf4', 'color' => '#166534',  'dot' => '#22c55e'  ],
 ];
 ?>
-<div class="wrap sfba-admin-wrap" style="max-width:1100px;">
+<div class="wrap sfba-admin-wrap">
 
 	<!-- Hero -->
 	<div class="sfba-dash-hero" style="margin-bottom:20px;">

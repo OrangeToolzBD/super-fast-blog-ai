@@ -100,7 +100,7 @@ $coverage_pct = $published_count > 0 ? min( 100, round( ( $index_count / $publis
 .sfba-section-sub { font-size:12px; color:#9ca3af; margin:0; }
 </style>
 
-<div class="wrap sfba-admin-wrap" style="max-width:1060px;">
+<div class="wrap sfba-admin-wrap">
 
 	<!-- Hero -->
 	<div class="sfba-dash-hero" style="margin-bottom:24px;">

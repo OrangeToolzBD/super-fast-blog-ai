@@ -28,7 +28,7 @@ class SFBA_Content_Generator {
 	/**
 	 * @var SFBA_Core
 	 */
-	private SFBA_Core $core;
+	private $core;
 
 	/**
 	 * @param SFBA_Core $core
@@ -44,7 +44,7 @@ class SFBA_Content_Generator {
 	/**
 	 * @param SFBA_Loader $loader
 	 */
-	public function init( SFBA_Loader $loader ): void {
+	public function init( SFBA_Loader $loader ) {
 		// Admin notice for missing SEO plugin (kept from SFBA v1).
 		$loader->add_action( 'admin_notices', $this, 'show_seo_plugin_notice' );
 
@@ -132,7 +132,7 @@ class SFBA_Content_Generator {
 	 * Show a one-time notice if neither Yoast SEO nor Rank Math is active.
 	 * Only shown on plugin pages.
 	 */
-	public function show_seo_plugin_notice(): void {
+	public function show_seo_plugin_notice() {
 		$screen = get_current_screen();
 		if ( ! $screen || false === strpos( $screen->id, 'super-fast-blog-ai' ) ) {
 			return;
@@ -161,7 +161,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Generate a full article and save it as a WordPress draft post.
 	 */
-	public function rest_generate_article( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_generate_article( WP_REST_Request $request ) {
 		$s = $this->core->settings;
 
 		// Gather request params (override settings per-request where supplied).
@@ -264,7 +264,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Generate a structured article outline.
 	 */
-	public function rest_generate_outline( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_generate_outline( WP_REST_Request $request ) {
 		$title    = (string) $request->get_param( 'title' );
 		$keywords = (string) $request->get_param( 'keywords' );
 
@@ -289,7 +289,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Generate a list of title options for a topic.
 	 */
-	public function rest_generate_title( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_generate_title( WP_REST_Request $request ) {
 		$topic    = (string) $request->get_param( 'topic' );
 		$keywords = (string) $request->get_param( 'keywords' );
 		$count    = absint( $request->get_param( 'count' ) );
@@ -309,7 +309,7 @@ class SFBA_Content_Generator {
 
 		$titles = array_filter(
 			array_map( 'trim', explode( "\n", $result['text'] ) ),
-			fn( $l ) => strlen( $l ) > 3
+			function( $l ) { return strlen( $l ) > 3; }
 		);
 
 		return SFBA_Rest_Api::success( array_values( $titles ) );
@@ -320,7 +320,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Rewrite supplied content, optionally changing tone, style, and language.
 	 */
-	public function rest_rewrite_content( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_rewrite_content( WP_REST_Request $request ) {
 		$s          = $this->core->settings;
 		$content    = (string) $request->get_param( 'content' );
 		$tone       = (string) ( $request->get_param( 'tone' ) ?: $s->get( 'content.tone', 'formal' ) );
@@ -363,7 +363,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Return N SEO keyword suggestions for a topic.
 	 */
-	public function rest_seo_keywords( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_seo_keywords( WP_REST_Request $request ) {
 		$topic  = (string) $request->get_param( 'topic' );
 		$count  = absint( $request->get_param( 'count' ) );
 		$prompt = "Provide exactly {$count} SEO keywords, one per line (no numbering), for the topic: \"{$topic}\".";
@@ -379,7 +379,7 @@ class SFBA_Content_Generator {
 
 		$keywords = array_filter(
 			array_map( 'trim', explode( "\n", $result['text'] ) ),
-			fn( $k ) => strlen( $k ) > 1
+			function( $k ) { return strlen( $k ) > 1; }
 		);
 
 		return SFBA_Rest_Api::success( array_values( $keywords ) );
@@ -390,7 +390,7 @@ class SFBA_Content_Generator {
 	 *
 	 * Generate a 160-character meta description.
 	 */
-	public function rest_seo_meta( WP_REST_Request $request ): WP_REST_Response {
+	public function rest_seo_meta( WP_REST_Request $request ) {
 		$title    = (string) $request->get_param( 'title' );
 		$keywords = (string) $request->get_param( 'keywords' );
 
@@ -429,7 +429,7 @@ class SFBA_Content_Generator {
 	 *   - faq (bool), toc (bool), pros_cons (bool)
 	 * @return string Full prompt string.
 	 */
-	public function build_article_prompt( string $title, string $keywords, array $opts ): string {
+	public function build_article_prompt( string $title, string $keywords, array $opts ) {
 		$content_type = $opts['content_type'] ?? 'blog_post';
 		$language     = $opts['language'] ?? 'English';
 		$style        = $opts['writing_style'] ?? 'informative';
@@ -440,13 +440,17 @@ class SFBA_Content_Generator {
 		$type_label = SFBA_Model_Router::CONTENT_TYPES[ $content_type ] ?? 'Blog / Long-form Article';
 
 		// Per-type structural guidance injected into the prompt.
-		$type_hint = match ( $content_type ) {
-			'product' => 'Structure it as a compelling product description: lead with the key benefit, cover features and specs, address objections, and end with a strong CTA.',
-			'social'  => 'Write short, punchy, platform-native content. Lead with a hook. Keep paragraphs to 1–2 sentences. End with an engaging call-to-action or question.',
-			'meta'    => 'Write in tight, conversion-focused prose. Every sentence must add value. Include the primary keyword naturally within the first 50 words.',
-			'email'   => 'Structure it as an email newsletter: a compelling subject line idea, a brief personal intro, the main value section, and a clear CTA.',
-			default   => 'Structure it as a long-form blog article with an engaging introduction, well-organised H2/H3 sections, and a clear conclusion.',
-		};
+		if ( 'product' === $content_type ) {
+			$type_hint = 'Structure it as a compelling product description: lead with the key benefit, cover features and specs, address objections, and end with a strong CTA.';
+		} elseif ( 'social' === $content_type ) {
+			$type_hint = 'Write short, punchy, platform-native content. Lead with a hook. Keep paragraphs to 1–2 sentences. End with an engaging call-to-action or question.';
+		} elseif ( 'meta' === $content_type ) {
+			$type_hint = 'Write in tight, conversion-focused prose. Every sentence must add value. Include the primary keyword naturally within the first 50 words.';
+		} elseif ( 'email' === $content_type ) {
+			$type_hint = 'Structure it as an email newsletter: a compelling subject line idea, a brief personal intro, the main value section, and a clear CTA.';
+		} else {
+			$type_hint = 'Structure it as a long-form blog article with an engaging introduction, well-organised H2/H3 sections, and a clear conclusion.';
+		}
 
 		$lines = [];
 
@@ -534,7 +538,7 @@ class SFBA_Content_Generator {
 	 * @param array  $options      Additional options (system, max_tokens, temperature).
 	 * @return array|WP_Error
 	 */
-	private function call_provider( string $content_type, string $prompt, array $options = [] ): array|WP_Error {
+	private function call_provider( string $content_type, string $prompt, array $options = [] ) {
 		$route = $this->core->providers->resolve_route( $content_type );
 		if ( null === $route ) {
 			return new WP_Error(
@@ -580,7 +584,7 @@ class SFBA_Content_Generator {
 	 *
 	 * @return int|WP_Error Post ID on success.
 	 */
-	private function insert_post( string $title, string $content ): int|WP_Error {
+	private function insert_post( string $title, string $content ) {
 		$categories = $this->core->settings->get( 'publishing.categories', [] );
 
 		$post_id = wp_insert_post( [
@@ -606,7 +610,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Insert a generation row into the schedule log table.
 	 */
-	private function insert_schedule_log( string $title, int $post_id, int $char_len, array $result ): void {
+	private function insert_schedule_log( string $title, int $post_id, int $char_len, array $result ) {
 		global $wpdb;
 
 		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -630,7 +634,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Write SEO meta to Yoast or Rank Math post meta fields.
 	 */
-	private function update_seo_meta( int $post_id, string $keyword, string $meta_desc ): void {
+	private function update_seo_meta( int $post_id, string $keyword, string $meta_desc ) {
 		$s         = $this->core->settings;
 		$yoast     = 'wordpress-seo/wp-seo.php';
 		$rank_math = 'seo-by-rank-math/rank-math.php';
@@ -659,7 +663,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Set the featured image using the configured image source.
 	 */
-	private function set_featured_image( int $post_id, string $keyword, string $title ): void {
+	private function set_featured_image( int $post_id, string $keyword, string $title ) {
 		$source   = $this->core->settings->get( 'images.source', 'dalle3' );
 		$is_temp  = false;
 		$image    = null;
@@ -702,7 +706,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Generate DALL-E 3 image; returns local temp file path or null.
 	 */
-	private function generate_dalle_image( string $title ): ?string {
+	private function generate_dalle_image( string $title ) {
 		$api_key = $this->core->settings->get_api_key( 'openai' );
 		if ( '' === $api_key ) {
 			return null;
@@ -741,7 +745,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Fetch image URL from Pixabay.
 	 */
-	private function fetch_pixabay_image( string $keyword, string $title ): ?string {
+	private function fetch_pixabay_image( string $keyword, string $title ) {
 		$api_key = $this->core->settings->get( 'images.pixabay_key', '' );
 		if ( '' === $api_key ) {
 			return null;
@@ -769,7 +773,7 @@ class SFBA_Content_Generator {
 
 			$data = json_decode( wp_remote_retrieve_body( $response ), true );
 			if ( ! empty( $data['hits'] ) ) {
-				usort( $data['hits'], fn( $a, $b ) => $b['views'] - $a['views'] );
+				usort( $data['hits'], function( $a, $b ) { return $b['views'] - $a['views']; } );
 				return $data['hits'][0]['largeImageURL'] ?? null;
 			}
 		}
@@ -780,7 +784,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Fetch image URL from Unsplash.
 	 */
-	private function fetch_unsplash_image( string $keyword, string $title ): ?string {
+	private function fetch_unsplash_image( string $keyword, string $title ) {
 		$access_key = $this->core->settings->get( 'images.unsplash_key', '' );
 		if ( '' === $access_key ) {
 			return null;
@@ -813,7 +817,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Send email notification to admin about new generated post.
 	 */
-	private function send_email_notification( int $post_id ): void {
+	private function send_email_notification( int $post_id ) {
 		$post        = get_post( $post_id );
 		$admin_email = get_option( 'admin_email' );
 		$subject     = __( 'New post generated by Super Fast Blog AI', 'super-fast-blog-ai' );
@@ -837,7 +841,7 @@ class SFBA_Content_Generator {
 	/**
 	 * Return the REST args definition for the /generate/article endpoint.
 	 */
-	private function article_args(): array {
+	private function article_args() {
 		return [
 			'title'         => [ 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ],
 			'content_type'  => [ 'type' => 'string', 'default' => 'blog', 'sanitize_callback' => 'sanitize_key', 'enum' => array_keys( SFBA_Model_Router::CONTENT_TYPES ) ],

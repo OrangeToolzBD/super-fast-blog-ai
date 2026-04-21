@@ -34,7 +34,7 @@ $provider_icons = [
 	'dalle3'     => '🎨',
 ];
 ?>
-<div class="wrap sfba-admin-wrap" style="max-width:1060px;">
+<div class="wrap sfba-admin-wrap">
 
 	<!-- Hero -->
 	<div class="sfba-dash-hero" style="margin-bottom:20px;">
@@ -88,24 +88,26 @@ $provider_icons = [
 
 		<?php
 		$provider_colors = [
-			'anthropic' => [ 'accent' => '#e07b39', 'bg' => '#fff8f4' ],
-			'openai'    => [ 'accent' => '#10a37f', 'bg' => '#f0fdf9' ],
-			'gemini'    => [ 'accent' => '#4285f4', 'bg' => '#eff6ff' ],
-			'mistral'   => [ 'accent' => '#2d75ca', 'bg' => '#eff6ff' ],
-			'groq'      => [ 'accent' => '#f55036', 'bg' => '#fff5f4' ],
-			'cohere'    => [ 'accent' => '#39594d', 'bg' => '#f0fdf4' ],
-			'deepseek'  => [ 'accent' => '#4d6bfe', 'bg' => '#f0f0ff' ],
-			'ollama'    => [ 'accent' => '#8b5cf6', 'bg' => '#f5f3ff' ],
+			'anthropic'  => [ 'accent' => '#e07b39', 'bg' => '#fff8f4' ],
+			'openai'     => [ 'accent' => '#10a37f', 'bg' => '#f0fdf9' ],
+			'gemini'     => [ 'accent' => '#4285f4', 'bg' => '#eff6ff' ],
+			'mistral'    => [ 'accent' => '#ff7000', 'bg' => '#fff7ed' ],
+			'groq'       => [ 'accent' => '#f55036', 'bg' => '#fff5f4' ],
+			'cohere'     => [ 'accent' => '#39594d', 'bg' => '#f0fdf4' ],
+			'deepseek'   => [ 'accent' => '#4d6bfe', 'bg' => '#f0f0ff' ],
+			'ollama'     => [ 'accent' => '#374151', 'bg' => '#f9fafb' ],
+			'openrouter' => [ 'accent' => '#6467f2', 'bg' => '#eef2ff' ],
 		];
-		// Simple Icons CDN logos — only for providers with confirmed icons.
+		// Simple Icons CDN logos.
 		$provider_logos = [
-			'anthropic' => 'https://cdn.simpleicons.org/anthropic/e07b39',
-			'openai'    => 'https://cdn.simpleicons.org/openai/10a37f',
-			'gemini'    => 'https://cdn.simpleicons.org/googlegemini/4285f4',
-			'mistral'   => 'https://cdn.simpleicons.org/mistralai/ff7000',
-			'cohere'    => 'https://cdn.simpleicons.org/cohere/39594d',
-			'deepseek'  => 'https://cdn.simpleicons.org/deepseek/4d6bfe',
-			'ollama'    => 'https://cdn.simpleicons.org/ollama/8b5cf6',
+			'anthropic'  => 'https://cdn.simpleicons.org/anthropic/e07b39',
+			'openai'     => 'https://cdn.simpleicons.org/openai/10a37f',
+			'gemini'     => 'https://cdn.simpleicons.org/googlegemini/4285f4',
+			'mistral'    => 'https://cdn.simpleicons.org/mistralai/ff7000',
+			'cohere'     => 'https://cdn.simpleicons.org/cohere/39594d',
+			'deepseek'   => 'https://cdn.simpleicons.org/deepseek/4d6bfe',
+			'ollama'     => 'https://cdn.simpleicons.org/ollama/000000',
+			'openrouter' => 'https://cdn.simpleicons.org/openrouter/6467f2',
 			// groq: not in Simple Icons yet — falls back to emoji
 		];
 		?>

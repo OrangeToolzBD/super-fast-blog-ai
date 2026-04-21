@@ -51,6 +51,8 @@ class SFBA_Settings {
 	public function init( SFBA_Loader $loader ): void {
 		// Top-level menu + dashboard submenu — priority 10.
 		$loader->add_action( 'admin_menu', $this, 'register_admin_menu' );
+		// Usage Guide — null parent keeps it out of any visible menu while still accessible via URL.
+		$loader->add_action( 'admin_menu', $this, 'register_guide_menu', 11 );
 		// Settings submenu — priority 99 so it always appears last.
 		$loader->add_action( 'admin_menu', $this, 'register_settings_menu', 99 );
 		$loader->add_action( 'admin_enqueue_scripts', $this, 'enqueue_admin_assets' );
@@ -192,6 +194,30 @@ class SFBA_Settings {
 	}
 
 	/**
+	 * Register the Usage Guide as an orphan page (null parent = invisible in nav, accessible via URL).
+	 */
+	public function register_guide_menu(): void {
+		add_submenu_page(
+			null,
+			__( 'Usage Guide — Super Fast Blog AI', 'super-fast-blog-ai' ),
+			__( 'Usage Guide', 'super-fast-blog-ai' ),
+			'manage_options',
+			'sfba-guide',
+			[ $this, 'render_guide_page' ]
+		);
+	}
+
+	/**
+	 * Render the usage guide page.
+	 */
+	public function render_guide_page(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'super-fast-blog-ai' ) );
+		}
+		include SFBA_PLUGIN_DIR . 'includes/admin/page-guide.php';
+	}
+
+	/**
 	 * Register the Settings submenu at priority 99 so it appears last in the menu.
 	 */
 	public function register_settings_menu(): void {
@@ -213,12 +239,13 @@ class SFBA_Settings {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'super-fast-blog-ai' ) );
 		}
 
-		$summary      = $this->core->cost_tracker->get_monthly_summary();
-		$voice_status = $this->core->brand_voice->get_voice_summary() !== null;
-		$providers    = $this->core->providers->get_all_providers();
-		$connected    = count( array_filter( $providers, fn( $p ) => $p['has_key'] ) );
-		$api_base     = rest_url( SFBA_Rest_Api::NAMESPACE );
-		$nonce        = wp_create_nonce( 'wp_rest' );
+		$summary          = $this->core->cost_tracker->get_monthly_summary();
+		$voice_status     = $this->core->brand_voice->get_voice_summary() !== null;
+		$providers        = $this->core->providers->get_all_providers();
+		$connected        = count( array_filter( $providers, fn( $p ) => $p['has_key'] ) );
+		$default_provider = $this->get( 'default_provider', '' );
+		$api_base         = rest_url( SFBA_Rest_Api::NAMESPACE );
+		$nonce            = wp_create_nonce( 'wp_rest' );
 
 		include SFBA_PLUGIN_DIR . 'includes/admin/page-dashboard.php';
 	}
@@ -285,6 +312,7 @@ class SFBA_Settings {
 		$sfba_pages = [
 			'super-fast-blog-ai',
 			'sfba-settings',
+			'sfba-guide',
 			'sfba-cost-tracker',
 			'sfba-content-calendar',
 			'sfba-performance',

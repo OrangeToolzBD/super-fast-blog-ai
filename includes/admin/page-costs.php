@@ -21,7 +21,7 @@ $status_colors = [
 ];
 $budget_color = $status_colors[ $budget['status'] ?? 'ok' ] ?? 'green';
 ?>
-<div class="wrap sfba-admin-wrap" style="max-width:1060px;">
+<div class="wrap sfba-admin-wrap">
 
 	<!-- Hero -->
 	<div class="sfba-dash-hero" style="margin-bottom:20px;">

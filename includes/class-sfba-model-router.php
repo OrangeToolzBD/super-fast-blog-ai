@@ -119,7 +119,7 @@ class SFBA_Model_Router {
 	// -------------------------------------------------------------------------
 
 	/** @var SFBA_Core */
-	private SFBA_Core $core;
+	private $core;
 
 	// -------------------------------------------------------------------------
 	// Constructor.
@@ -155,7 +155,7 @@ class SFBA_Model_Router {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'rest_set_rule' ],
 				'permission_callback' => [ $this->core->rest_api, 'require_editor' ],
-				'args'                => $this->rule_schema_args( required: true ),
+				'args'                => $this->rule_schema_args( true ),
 			],
 		] );
 
@@ -167,7 +167,7 @@ class SFBA_Model_Router {
 				'permission_callback' => [ $this->core->rest_api, 'require_editor' ],
 				'args'                => array_merge(
 					[ 'id' => [ 'type' => 'integer', 'required' => true, 'minimum' => 1 ] ],
-					$this->rule_schema_args( required: false )
+					$this->rule_schema_args( false )
 				),
 			],
 			[
@@ -359,7 +359,7 @@ class SFBA_Model_Router {
 	 * @param string $content_type One of: blog, product, social, meta, email.
 	 * @return array|WP_Error
 	 */
-	public function get_model_for_content_type( string $content_type ): array|WP_Error {
+	public function get_model_for_content_type( string $content_type ) {
 		if ( ! array_key_exists( $content_type, self::CONTENT_TYPES ) ) {
 			return new WP_Error(
 				'sfba_invalid_input',
@@ -416,7 +416,7 @@ class SFBA_Model_Router {
 	 * @param array  $options
 	 * @return int|WP_Error
 	 */
-	public function set_routing_rule( string $content_type, string $provider, string $model, array $options = [] ): int|WP_Error {
+	public function set_routing_rule( string $content_type, string $provider, string $model, array $options = [] ) {
 		global $wpdb;
 
 		$content_type = sanitize_key( $content_type );
@@ -488,7 +488,7 @@ class SFBA_Model_Router {
 	 * @param array  $options
 	 * @return array|WP_Error
 	 */
-	public function ab_test_generation( string $prompt, string $content_type = 'blog', array $options = [] ): array|WP_Error {
+	public function ab_test_generation( string $prompt, string $content_type = 'blog', array $options = [] ) {
 		if ( trim( $prompt ) === '' ) {
 			return new WP_Error( 'sfba_invalid_input', __( 'Prompt cannot be empty.', 'super-fast-blog-ai' ) );
 		}
@@ -572,7 +572,7 @@ class SFBA_Model_Router {
 	 * @param int $rule_id
 	 * @return bool|WP_Error
 	 */
-	public function delete_rule( int $rule_id ): bool|WP_Error {
+	public function delete_rule( int $rule_id ) {
 		global $wpdb;
 
 		$exists = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -656,7 +656,7 @@ class SFBA_Model_Router {
 	 * @param array $data
 	 * @return bool|WP_Error
 	 */
-	private function update_rule( int $rule_id, array $data ): bool|WP_Error {
+	private function update_rule( int $rule_id, array $data ) {
 		global $wpdb;
 
 		$update  = [];
@@ -751,7 +751,7 @@ class SFBA_Model_Router {
 	 * @param array|null $other_side
 	 * @return array|WP_Error
 	 */
-	private function resolve_ab_model( string $content_type, string $provider, string $model, string $side, ?array $other_side = null ): array|WP_Error {
+	private function resolve_ab_model( string $content_type, string $provider, string $model, string $side, ?array $other_side = null ) {
 		// Explicit override wins.
 		if ( '' !== $provider && '' !== $model ) {
 			return [ 'provider' => $provider, 'model' => $model ];
@@ -813,10 +813,11 @@ class SFBA_Model_Router {
 		$best_rate = PHP_FLOAT_MAX;
 		$best      = null;
 
-		$prompt_share = match( $content_type ) {
-			'meta', 'social', 'email' => 0.50,
-			default                   => 0.30,
-		};
+		if ( 'meta' === $content_type || 'social' === $content_type || 'email' === $content_type ) {
+			$prompt_share = 0.50;
+		} else {
+			$prompt_share = 0.30;
+		}
 
 		foreach ( SFBA_Cost_Tracker::PRICING as $prov => $models ) {
 			if ( '' === $this->core->settings->get_api_key( $prov ) && 'ollama' !== $prov ) {
@@ -857,7 +858,7 @@ class SFBA_Model_Router {
 	 * @param int    $post_id
 	 * @return array|WP_Error
 	 */
-	private function run_ab_side( string $prompt, array $config, int $max_tokens, string $content_type, int $post_id ): array|WP_Error {
+	private function run_ab_side( string $prompt, array $config, int $max_tokens, string $content_type, int $post_id ) {
 		$provider_slug = $config['provider'];
 		$model         = $config['model'];
 
@@ -1007,23 +1008,29 @@ class SFBA_Model_Router {
 			? (int) round( abs( $cost_a - $cost_b ) / $cost_a * 100 )
 			: 0;
 
-		$cheaper = match( true ) {
-			$cost_a < $cost_b => 'model_a',
-			$cost_b < $cost_a => 'model_b',
-			default            => 'tie',
-		};
+		if ( $cost_a < $cost_b ) {
+			$cheaper = 'model_a';
+		} elseif ( $cost_b < $cost_a ) {
+			$cheaper = 'model_b';
+		} else {
+			$cheaper = 'tie';
+		}
 
-		$faster = match( true ) {
-			$a['generation_time_ms'] < $b['generation_time_ms'] => 'model_a',
-			$b['generation_time_ms'] < $a['generation_time_ms'] => 'model_b',
-			default                                              => 'tie',
-		};
+		if ( $a['generation_time_ms'] < $b['generation_time_ms'] ) {
+			$faster = 'model_a';
+		} elseif ( $b['generation_time_ms'] < $a['generation_time_ms'] ) {
+			$faster = 'model_b';
+		} else {
+			$faster = 'tie';
+		}
 
-		$longer = match( true ) {
-			$a['text_length'] > $b['text_length'] => 'model_a',
-			$b['text_length'] > $a['text_length'] => 'model_b',
-			default                                => 'tie',
-		};
+		if ( $a['text_length'] > $b['text_length'] ) {
+			$longer = 'model_a';
+		} elseif ( $b['text_length'] > $a['text_length'] ) {
+			$longer = 'model_b';
+		} else {
+			$longer = 'tie';
+		}
 
 		return [
 			'cost_diff_usd'     => abs( $cost_diff ),
@@ -1150,6 +1157,6 @@ class SFBA_Model_Router {
 			'temperature'  => $request->get_param( 'temperature' ),
 			'priority'     => $request->get_param( 'priority' ),
 			'is_active'    => $request->get_param( 'is_active' ),
-		], fn( $v ) => null !== $v );
+		], function( $v ) { return null !== $v; } );
 	}
 }
