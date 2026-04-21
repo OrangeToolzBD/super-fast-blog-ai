@@ -27,14 +27,15 @@ if ( $default_provider && isset( $providers[ $default_provider ] ) ) {
 	$dp_connected = ! empty( $providers[ $default_provider ]['has_key'] );
 }
 
+$_pimg = SFBA_PLUGIN_URL . 'assets/images/providers/';
 $provider_meta = [
-	'openai'     => [ 'label' => 'OpenAI',     'logo' => 'https://cdn.simpleicons.org/openai/10a37f',      'color' => '#10a37f', 'bg' => '#f0fdf9', 'fallback' => '🤖' ],
-	'anthropic'  => [ 'label' => 'Anthropic',  'logo' => 'https://cdn.simpleicons.org/anthropic/e07b39',   'color' => '#e07b39', 'bg' => '#fff8f4', 'fallback' => '🧠' ],
-	'gemini'     => [ 'label' => 'Gemini',     'logo' => 'https://cdn.simpleicons.org/googlegemini/4285f4','color' => '#4285f4', 'bg' => '#eff6ff', 'fallback' => '💎' ],
-	'mistral'    => [ 'label' => 'Mistral',    'logo' => 'https://cdn.simpleicons.org/mistralai/ff7000',   'color' => '#ff7000', 'bg' => '#fff7ed', 'fallback' => '🌊' ],
-	'deepseek'   => [ 'label' => 'DeepSeek',   'logo' => 'https://cdn.simpleicons.org/deepseek/4d6bfe',    'color' => '#4d6bfe', 'bg' => '#f0f0ff', 'fallback' => '🔍' ],
-	'openrouter' => [ 'label' => 'OpenRouter',  'logo' => 'https://cdn.simpleicons.org/openrouter/6467f2', 'color' => '#6467f2', 'bg' => '#eef2ff', 'fallback' => '📡' ],
-	'ollama'     => [ 'label' => 'Ollama',     'logo' => 'https://cdn.simpleicons.org/ollama/000000',      'color' => '#374151', 'bg' => '#f9fafb', 'fallback' => '🖥️' ],
+	'openai'     => [ 'label' => 'OpenAI',     'logo' => $_pimg . 'openai.svg',       'color' => '#10a37f', 'bg' => '#f0fdf9', 'fallback' => '🤖' ],
+	'anthropic'  => [ 'label' => 'Anthropic',  'logo' => $_pimg . 'anthropic.svg',    'color' => '#c7501a', 'bg' => '#fff8f4', 'fallback' => '🧠' ],
+	'google'     => [ 'label' => 'Gemini',     'logo' => $_pimg . 'googlegemini.svg', 'color' => '#4285f4', 'bg' => '#eff6ff', 'fallback' => '💎' ],
+	'mistral'    => [ 'label' => 'Mistral',    'logo' => $_pimg . 'mistralai.svg',    'color' => '#ff7000', 'bg' => '#fff7ed', 'fallback' => '🌊' ],
+	'deepseek'   => [ 'label' => 'DeepSeek',   'logo' => $_pimg . 'deepseek.svg',     'color' => '#4d6bfe', 'bg' => '#f0f0ff', 'fallback' => '🔍' ],
+	'openrouter' => [ 'label' => 'OpenRouter', 'logo' => $_pimg . 'openrouter.svg',   'color' => '#6467f2', 'bg' => '#eef2ff', 'fallback' => '📡' ],
+	'ollama'     => [ 'label' => 'Ollama',     'logo' => $_pimg . 'ollama.svg',       'color' => '#374151', 'bg' => '#f9fafb', 'fallback' => '🖥️' ],
 ];
 
 $quick_links = [
