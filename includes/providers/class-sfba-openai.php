@@ -110,7 +110,7 @@ class SFBA_Provider_OpenAI extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$response = $this->http_get( 'https://api.openai.com/v1/models' );
 		return is_wp_error( $response ) ? $response : true;
 	}

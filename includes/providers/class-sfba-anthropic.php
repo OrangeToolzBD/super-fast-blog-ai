@@ -131,7 +131,7 @@ class SFBA_Provider_Anthropic extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$response = $this->http_post( $this->endpoint(), [
 			'model'      => 'claude-haiku-4-5-20251001',
 			'max_tokens' => 1,

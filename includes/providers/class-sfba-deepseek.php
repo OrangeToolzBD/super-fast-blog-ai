@@ -97,7 +97,7 @@ class SFBA_Provider_DeepSeek extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$response = $this->http_get( 'https://api.deepseek.com/models' );
 		return is_wp_error( $response ) ? $response : true;
 	}

@@ -104,7 +104,7 @@ class SFBA_Provider_Ollama extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$base     = $this->settings->get( 'providers.ollama.base_url', 'http://localhost:11434' );
 		$url      = rtrim( (string) $base, '/' ) . '/api/tags';
 		$response = $this->http_get( $url );

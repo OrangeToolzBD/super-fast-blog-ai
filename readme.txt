@@ -153,12 +153,8 @@ Install Ollama from ollama.com, pull a model (`ollama pull llama3.3`), then add 
 1. Dashboard — stats cards and feature module grid
 2. Title Generator — generate and save AI title ideas
 3. Article Generator — full SEO blog post creation
-4. Repurpose Content — 6-platform content repurposing with hashtag language control
-5. Brand Voice — writing style configuration
-6. Content Calendar — AI topic planning
-7. Cost Tracker — API spend monitoring and budget alerts
-8. Model Routing — per-content-type model assignment
-9. Settings — provider configuration with logos and API keys
+4. Brand Voice — writing style configuration
+5. Repurpose Content — 6-platform content repurposing with hashtag language control
 
 == Changelog ==
 
@@ -183,7 +179,7 @@ Install Ollama from ollama.com, pull a model (`ollama pull llama3.3`), then add 
 * **Improved:** Settings hash tab switching fixed (hashchange listener)
 * **Improved:** Model Routing empty state redesigned with modern UI
 * **Improved:** Cost calculation bug fixed (this_month_cost key, budget key names)
-* **Requires PHP:** 8.1+ (upgraded from 8.0)
+* **Requires PHP:** 8.0+
 
 = 1.0.1 (June 12, 2025) =
 * Some technical issue fixes.
@@ -194,4 +190,4 @@ Install Ollama from ollama.com, pull a model (`ollama pull llama3.3`), then add 
 == Upgrade Notice ==
 
 = 2.0.0 =
-Major update. Adds 7 AI providers, content repurposing, cost tracking, model routing, brand voice, and a fully redesigned admin interface. Requires PHP 8.1+. Back up your site before upgrading.
+Major update. Adds 7 AI providers, content repurposing, cost tracking, model routing, brand voice, and a fully redesigned admin interface. Requires PHP 8.0+. Back up your site before upgrading.

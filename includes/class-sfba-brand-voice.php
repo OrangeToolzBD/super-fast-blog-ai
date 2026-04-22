@@ -183,9 +183,9 @@ class SFBA_Brand_Voice {
 	 * Read the last N published posts and build a brand voice profile.
 	 *
 	 * @param int $post_count Posts to analyze (5–100).
-	 * @return true|WP_Error
+	 * @return bool|WP_Error
 	 */
-	public function analyze_existing_content( int $post_count = 30 ): true|WP_Error {
+	public function analyze_existing_content( int $post_count = 30 ): bool|WP_Error {
 		$post_count = max( 1, min( 200, $post_count ) );
 
 		$posts = get_posts( [

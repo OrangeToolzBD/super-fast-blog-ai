@@ -220,7 +220,7 @@ class SFBA_Provider_Google extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$url      = self::BASE_URL . '?key=' . rawurlencode( $this->api_key );
 		$response = $this->http_get( $url );
 		return is_wp_error( $response ) ? $response : true;

@@ -58,9 +58,9 @@ interface SFBA_Provider_Interface {
 	/**
 	 * Test whether the stored API key is valid.
 	 *
-	 * @return true|WP_Error True on success, WP_Error on failure.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
-	public function validate_key(): true|WP_Error;
+	public function validate_key(): bool|WP_Error;
 
 	/**
 	 * Return the list of models available for this provider.

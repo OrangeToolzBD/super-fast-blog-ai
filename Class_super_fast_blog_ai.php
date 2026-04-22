@@ -5,7 +5,7 @@
  * Description: AI-powered blog content generator with 7 provider support, brand voice learning, content calendar, internal linking, cost tracking, and advanced model routing. Bring Your Own Key — no subscriptions.
  * Version:     2.0.0
  * Requires at least: 6.3
- * Requires PHP: 8.1
+ * Requires PHP: 8.0
  * Tested up to: 6.9
  * Author:      waatechdigital
  * Author URI:  https://waatechdigital.com

@@ -100,7 +100,7 @@ class SFBA_Provider_OpenRouter extends SFBA_Provider_Abstract {
 	// -------------------------------------------------------------------------
 
 	/** @inheritDoc */
-	public function validate_key(): true|WP_Error {
+	public function validate_key(): bool|WP_Error {
 		$response = $this->http_get( 'https://openrouter.ai/api/v1/auth/key' );
 		return is_wp_error( $response ) ? $response : true;
 	}
