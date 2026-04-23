@@ -593,3 +593,6 @@
 
 /* ── Rules wrap ──────────────────────────────────────────────── */
 .sfba-rules-wrap { margin-bottom: 16px; }
+
+/* ── WordPress Admin Body Padding ────────────────────────────── */
+#wpbody { padding-right: 10px; }
