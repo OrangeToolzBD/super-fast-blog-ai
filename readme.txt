@@ -1,5 +1,5 @@
 === Super Fast Blog AI – AI Content Generator, Repurposer & SEO Writer ===
-Contributors: waatechdigital, khan9, ikefti
+Contributors: waatechdigital, khan9, ikefti, mehedi0plugin
 Tags: ai writer, content generator, seo content, repurpose, blog ai
 Requires at least: 6.3
 Tested up to: 6.9
